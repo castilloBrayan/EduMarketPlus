@@ -32,8 +32,7 @@ async function testConnection() {
     connection.release() // Libera la conexión de vuelta al pool
   } catch (error) {
     console.error('Error al conectar con MySQL:', error.message)
-    // En un entorno de producción, detener app aquí
-    // process.exit(1)
+    process.exit(1)
   }
 }
 
