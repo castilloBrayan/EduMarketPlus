@@ -115,3 +115,55 @@ export const listCourses = async (req, res) => {
         })
     }
 }
+
+/**
+ * Obtiene la información detallada de un curso específico por ID
+ * GET /api/courses/:id (Pública), lectura de Parámetros
+ */
+export const getCourseDetails = async (req, res) => {
+    // Capturamos el ID del curso de los parámetros de la URL
+    const courseId = req.params.id
+    
+    try {
+        // Consulta SQL para obtener un curso específico y sus detalles de instructor
+        const courseQuery = `
+            SELECT
+                c.id,
+                c.titulo,
+                c.descripcion,
+                c.precio,
+                c.clasificacion,
+                c.imagen_url
+                c.instructor_id,
+                u.nombre AS instructor_nombre,
+                u.foto_url AS instructor_foto_url
+            FROM cursos c
+            JOIN usuarios u ON c.instructor_id = u.id
+            WHERE c.id = ?;
+        `
+
+        // Ejecutar consulta, usando el courseId en la cláusula WHERE
+        const [courses] = await pool.execute(courseQuery, [courseId])
+
+        const course = courses[0]
+
+        // Manejar caso de curso no encontrado (404)
+        if (!course) {
+            return res.status(404).json({
+                error: `Curso con ID ${courseId} no encontrado`
+            })
+        }
+
+        // Respuesta exitosa
+        res.status(200).json({
+            message: 'Detalles del curso recuperados exitosamente',
+            data: course
+        })
+
+    } catch (error) {
+        console.error(`Error al obtener el detalle del curso ID ${courseId}: `, error)
+        res.status(500).json({
+            error: 'Error interno del servidor al obtener el detalle del curso'
+        })
+    }
+}
