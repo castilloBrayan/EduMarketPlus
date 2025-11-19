@@ -1,5 +1,8 @@
 import { pool } from '../config/db.mysql.js' // Importar el pool de conexiones
 
+/**
+ * Definir y crear la tabla 'usuarios' en MySQL si no existe
+ */
 async function setupUserModel() {
 
     const createUserTableQuery = `
@@ -24,4 +27,5 @@ async function setupUserModel() {
     }
     }
 
+// Exportar la función de configuración del modelo
 export { setupUserModel }

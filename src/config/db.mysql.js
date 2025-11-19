@@ -13,6 +13,7 @@ const {
   DB_PORT
 } = process.env
 
+// Crear el Pool de Conexiones
 const pool = mysql.createPool({
     host: DB_HOST,
     user: DB_USER,
@@ -24,6 +25,7 @@ const pool = mysql.createPool({
     queueLimit: 0, // Sin límite en la cola de peticiones
 })
 
+// Función para probar la conexión
 async function testConnection() {
   try {
     // Intentar obtener una conexión del pool

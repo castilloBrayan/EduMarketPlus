@@ -3,8 +3,12 @@ import 'dotenv/config'
 
 const MONGODB_URL = process.env.MONGODB_URL
 
+/**
+ * Función para establecer la conexión a MongoDB
+ */
 async function connectMongoDB() {
   try {
+    // Usa .connect() de Mongoose con la URL
     await mongoose.connect(MONGODB_URL)
     
     console.log('Conexión a MongoDB establecida con éxito')
@@ -25,4 +29,5 @@ async function connectMongoDB() {
   }
 }
 
+// Exportar la función de conexión
 export { connectMongoDB }
