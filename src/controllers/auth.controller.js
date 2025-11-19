@@ -8,11 +8,14 @@ import jwt from 'jsonwebtoken' // Importar JWT
  * Un valor más alto significa que el hash será más seguro
  * Establecemos un factor de 'sal' (saltRounds) para bcrypt. 10 es un buen valor por defecto.
  */
-const saltRounds = 10
+const saltRounds = 10 // Para la función 'registerUser'
 
 // Obtener la clave secreta del entorno, para la función 'loginUser'
 const JWT_SECRET = process.env.JWT_SECRET
 const TOKEN_EXPIRATION = '1h' // Expiración de 1 hora
+
+// Lista de roles permitidos según los requerimientos del proyecto, para la función 'updateUserRole' 
+const VALID_ROLES = ['Visitante', 'Instructor', 'Estudiante', 'Asistencia', 'Admin']
 
 /**
  * Registrar un nuevo usuario en la base de datos
@@ -149,6 +152,63 @@ export const loginUser = async (req, res) => {
         console.error('Error en el inicio de sesión: ', error)
         res.status(500).json({
             error: 'Error interno del servidor'
+        })
+    }
+}
+
+/**
+ * Permite a un Admin cambiar el rol de otro usuario
+ * PUT /api/users/:id/role (Protegida unicamente para Admin)
+ */
+export const updateUserRole = async (req, res) => {
+    // El ID del usuario a modificar viene de los parámetros de la URL
+    const userIdToUpdate = req.params.id
+    // El nuevo rol viene del cuerpo de la petición
+    const { rol } = req.body
+    
+    // El ID del Admin que realiza la acción (viene de req.user, inyectado por authMiddleware)
+    const adminId = req.user.id 
+    
+    // Validación de campos y roles
+    if (!rol || typeof rol !== 'string') {
+        return res.status(400).json({
+            error: 'El campo "rol" es obligatorio y debe ser un texto'
+        })
+    }
+
+    // Verificar que el rol sea uno de los roles definidos en el proyecto
+    if (!VALID_ROLES.includes(rol)) {
+        return res.status(400).json({
+            error: `Rol inválido. Los roles permitidos son: ${VALID_ROLES.join(', ')}`
+        })
+    }
+
+    // Ejecutar la actualización en MySQL
+    try {
+        const [result] = await pool.execute(
+            'UPDATE usuarios SET rol = ? WHERE id = ?',
+            [rol, userIdToUpdate]
+        )
+
+        if (result.affectedRows === 0) {
+            // Si affectedRows es 0, el usuario con ese ID no fue encontrado
+            return res.status(404).json({
+                error: `Usuario con ID ${userIdToUpdate} no encontrado`
+            })
+        }
+
+        // Respuesta exitosa
+        console.log(`Admin ID ${adminId} cambió el rol del usuario ID ${userIdToUpdate} a ${rol}`)
+        res.status(200).json({
+            message: 'Rol de usuario actualizado exitosamente',
+            userId: userIdToUpdate,
+            newRole: rol
+        })
+
+    } catch (error) {
+        console.error('Error al gestionar el rol del usuario: ', error)
+        res.status(500).json({
+            error: 'Error interno del servidor al actualizar el rol'
         })
     }
 }

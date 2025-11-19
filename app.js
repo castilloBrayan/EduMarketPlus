@@ -1,6 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser' // Importar el parser de cookies
 import authRoutes from './src/routes/auth.routes.js' // Importar rutas de autenticación
+import userRoutes from './src/routes/user.routes.js' // Importar las rutas de usuario
 
 import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
@@ -16,7 +17,8 @@ app.use(express.json())
 app.use(cookieParser())
 
 // Montar rutas de autenticación
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authRoutes) // Autenticación (login/register)
+app.use('/api/users', userRoutes) // Gestión de usuarios (cambio de rol)
 
 // Probar la conexión al pool
 testConnection()
