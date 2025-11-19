@@ -44,3 +44,37 @@ export const authMiddleware = (req, res, next) => {
 
     }
 }
+
+/**
+ * Middleware para restringir el acceso basado en roles
+ * Acepta un array de roles permitidos
+ */
+export const roleMiddleware = (allowedRoles) => {
+    // Retorna la función middleware real que Express ejecutará
+    return (req, res, next) => {
+        // Verificar si req.user existe (depende de authMiddleware)
+        if (!req.user || !req.user.rol) {
+            // Si req.user no existe, es un error de configuración o el authMiddleware falló
+            // Ya debería ser manejado por authMiddleware (errores 401/403), pero es una capa de seguridad
+            return res.status(403).json({
+                error: 'Acceso denegado. Información de rol no disponible'
+            })
+        }
+
+        // Comprobar si el rol del usuario está incluido en los roles permitidos
+        const userRole = req.user.rol
+
+        // Convertimos a minúsculas para comparar
+        // lo mejor es ser consistente, pero la verificación debe ser estricta con los roles definidos
+        if (allowedRoles.includes(userRole)) {
+            // Si el rol es permitido, continúa
+            next()
+        } else {
+            // Si el rol no está permitido, denegar el acceso
+            console.warn(`Intento de acceso denegado: Usuario con rol "${userRole}" intentó acceder a ruta protegida`)
+            return res.status(403).json({
+                error: `Acceso denegado. Se requiere uno de los siguientes roles: ${allowedRoles.join(', ')}`
+            })
+        }
+    }
+}
