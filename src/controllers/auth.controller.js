@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import { pool } from '../config/db.mysql.js'
+import jwt from 'jsonwebtoken' // Importar JWT
 
 /**
  * En bcrypt de npm es el número de rondas de procesamiento computacional (factor de costo) 
@@ -8,6 +9,10 @@ import { pool } from '../config/db.mysql.js'
  * Establecemos un factor de 'sal' (saltRounds) para bcrypt. 10 es un buen valor por defecto.
  */
 const saltRounds = 10
+
+// Obtener la clave secreta del entorno, para la función 'loginUser'
+const JWT_SECRET = process.env.JWT_SECRET
+const TOKEN_EXPIRATION = '1h' // Expiración de 1 hora
 
 /**
  * Registrar un nuevo usuario en la base de datos
@@ -72,6 +77,78 @@ export const registerUser = async (req, res) => {
         res.status(500).json({
             error: 'Error interno del servidor al registrar el usuario'
             
+        })
+    }
+}
+
+/**
+ * Inicia sesión al usuario, genera un JWT y lo establece como cookie
+ * POST /api/auth/login
+ */
+export const loginUser = async (req, res) => {
+    const { correo, contraseña } = req.body
+    
+    // Validación de campos
+    if (!correo || !contraseña) {
+        return res.status(400).json({
+            error: 'Correo y contraseña son obligatorios'
+        })
+    }
+
+    try {
+        // Buscar al usuario por correo
+        const [users] = await pool.execute(
+            'SELECT id, rol, contraseña_hash, nombre FROM usuarios WHERE correo = ?', 
+            [correo]
+        )
+
+        const user = users[0]
+        
+        if (!user) {
+            // Usar mensaje genérico para seguridad
+            return res.status(401).json({
+                error: 'Credenciales inválidas'
+            })
+        }
+
+        // Comparar la contraseña hasheada (buenas prácticas)
+        const passwordsMatch = await bcrypt.compare(contraseña, user.contraseña_hash)
+
+        if (!passwordsMatch) {
+            // Usar mensaje genérico para seguridad
+            return res.status(401).json({
+                error: 'Credenciales inválidas'
+            })
+        }
+
+        // Generar el JSON Web Token (JWT)
+        const token = jwt.sign(
+            { id: user.id, rol: user.rol, nombre: user.nombre }, // Payload
+            JWT_SECRET,
+            { expiresIn: TOKEN_EXPIRATION }
+        )
+
+        // Enviar el JWT en una cookie HTTP-only (Requerimiento)
+        res.cookie('token', token, {
+            httpOnly: true, // No accesible vía JavaScript del navegador (seguridad)
+            // Para entornos de producción es recomendable usar:
+            // secure: process.env.NODE_ENV === 'production', // Solo enviar con HTTPS en producción
+            //En este caso se usará:
+            secure: false, // Permite que la cookie se envíe sobre HTTP (localhost)
+            maxAge: 60 * 60 * 1000, // 1 hora en milisegundos
+            sameSite: 'strict',
+        })
+
+        // Respuesta exitosa
+        res.status(200).json({
+            message: 'Inicio de sesión exitoso',
+            user: { id: user.id, nombre: user.nombre, rol: user.rol }
+        })
+
+    } catch (error) {
+        console.error('Error en el inicio de sesión: ', error)
+        res.status(500).json({
+            error: 'Error interno del servidor'
         })
     }
 }
