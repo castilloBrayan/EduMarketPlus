@@ -72,3 +72,46 @@ export const createCourse = async (req, res) => {
         })
     }
 }
+
+/**
+ * Obtiene y lista todos los cursos del catálogo
+ * GET /api/courses (Pública)
+ */
+export const listCourses = async (req, res) => {
+    try {
+        // Consulta SQL para obtener todos los cursos
+        // Incluimos el nombre del instructor (JOIN) para enriquecer el catálogo
+        const coursesQuery = `
+            SELECT
+                c.id, 
+                c.titulo, 
+                c.descripcion, 
+                c.precio, 
+                c.clasificacion, 
+                c.imagen_url,
+                c.instructor_id,
+                u.nombre AS instructor_nombre,
+                u.foto_url AS instructor_foto_url
+            FROM cursos c
+            JOIN usuarios u ON c.instructor_id = u.id
+            ORDER BY c.id DESC;
+        `
+
+        // Ejecutamos la consulta, [rows] contiene el array de cursos
+        const [courses] = await pool.execute(coursesQuery)
+
+        // Respuesta exitosa
+        // Devolver un array vacío si no hay cursos
+        res.status(200).json({
+            message: 'Lista de cursos recuperada exitosamente',
+            count: courses.length,
+            data: courses
+        })
+    
+    } catch (error) {
+        console.error('Error al listar los cursos: ', error)
+        res.status(500).json({
+            error: 'Error interno del servidor al obtener el catálogo'
+        })
+    }
+}
