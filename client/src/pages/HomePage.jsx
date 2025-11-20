@@ -21,7 +21,7 @@ const HomePage = () => {
 
                 setCourses(result.data)
             } catch (err) {
-                console.error("Error fetching courses: ", err)
+                console.error("Error al buscar cursos: ", err)
                 setError(err.message)
             } finally {
                 setLoading(false)

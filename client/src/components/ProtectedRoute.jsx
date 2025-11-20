@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     // Verificar Autenticación
     if (!user.isLoggedIn) {
         // Si no está logueado, redirigir a login
+        console.log(`Acceso denegado: no logueado`)
         return <Navigate to="/login" replace />
     }
 
