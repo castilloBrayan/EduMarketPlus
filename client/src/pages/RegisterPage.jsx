@@ -1,5 +1,111 @@
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+
 const RegisterPage = () => {
-    return <h1>Registro (Ruta: /register)</h1>
+    const [formData, setFormData] = useState({
+        nombre: '',
+        correo: '',
+        contraseña: '',
+        foto_url: ''
+    })
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState('')
+    const [loading, setLoading] = useState(false)
+
+    const navigate = useNavigate()
+
+    const handleChange = (e) => {
+        setFormData({ 
+            ...formData,
+            [e.target.name]: e.target.value 
+        })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setError('')
+        setSuccess('')
+        setLoading(true)
+
+        try {
+            // Validaciones básicas en el frontend (complemento a las del back)
+            if (formData.contraseña.length < 6) {
+                throw new Error('La contraseña debe tener al menos 6 caracteres')
+            }
+
+            // El backend verifica correo no duplicado y hashea
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // Enviar el objeto completo (el backend maneja la foto_url nula si no se envía)
+                body: JSON.stringify(formData),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                // Manejo de errores en backend (correo duplicado)
+                throw new Error(data.error || 'Fallo en el registro')
+            }
+
+            // Registro exitoso
+            setSuccess(data.message + ' Serás redirigido al login')
+
+            // Redirigir a la página de login para iniciar sesión (3 segundos despues)
+            setTimeout(() => {
+                navigate('/login')
+            }, 3000)
+
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="auth-container">
+            
+            <h2>Registro de Usuario</h2>
+
+            {error && <p className="error-message">{error}</p>}
+
+            {success && <p className="success-message">{success}</p>}
+
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} required />
+                </div>
+
+                <div>
+                    <label htmlFor="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" value={formData.correo} onChange={handleChange} required />
+                </div>
+
+                <div>
+                    <label htmlFor="contraseña">Contraseña:</label>
+                    <input type="password" id="contraseña" name="contraseña" value={formData.contraseña} onChange={handleChange} required />
+                </div>
+
+                <div>
+                    <label htmlFor="foto_url">Foto:</label>
+                    <input type="text" id="foto_url" name="foto_url" value={formData.foto_url} onChange={handleChange} />
+                </div>
+
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Registrando...' : 'Registrarme'}
+                </button>
+            </form>
+
+            <p>
+                ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
+            </p>
+        </div>
+    )
 }
 
 export default RegisterPage
