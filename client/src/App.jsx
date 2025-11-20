@@ -1,34 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+
 import './App.css'
 
+import ProtectedRoute from './components/ProtectedRoute'
+
+// Importar componentes de página
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import CourseDetailPage from './pages/CourseDetailPage'
+import CreateCoursePage from './pages/CreateCoursePage'
+import NotFoundPage from './pages/NotFoundPage'
+// TODO: import Navbar from './components/Navbar'
+
+
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Router>
+      
+      {/* <Navbar /> */}
+
+      <Routes>
+        {/* Rutas Públicas (S1-FE-013) */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/courses/:id" element={<CourseDetailPage />} />
+
+        {/* Ruta Protegida (S1-FE-013) */}
+        <Route 
+          path="/instructor/create" 
+          element={
+            // Proteger ruta solo para Admin e Instructor (pueden crear cursos)
+            <ProtectedRoute allowedRoles={['Admin', 'Instructor']}>
+              <CreateCoursePage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Ruta 'Catch-all' (404) */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Router>
   )
 }
 
