@@ -232,3 +232,43 @@ export const logoutUser = (req, res) => {
         message: 'Sesión cerrada exitosamente'
     })
 }
+
+/**
+ * Verifica la validez de la cookie de sesión y devuelve los datos del usuario
+ * GET /api/auth/verify (Protegida)
+ */
+export const verifySession = async (req, res) => {
+    // req.user es adjuntado por authMiddleware y contiene { id, rol }
+    const userId = req.user.id
+    
+    try {
+        const query = `
+            SELECT id, nombre, correo, rol, foto_url
+            FROM usuarios
+            WHERE id = ?`
+
+        const [users] = await pool.execute(query, [userId])
+
+        const user = users[0]
+
+        if (!user) {
+            // En caso de que el usuario ya no existe en la DB devolver 401
+            return res.status(401).json({ error: 'Usuario no encontrado. Sesión expirada' })
+        }
+
+        // Respuesta exitosa con los datos del usuario
+        res.status(200).json({
+            message: 'Sesión verificada y activa',
+            user: {
+                id: user.id,
+                nombre: user.nombre,
+                rol: user.rol,
+                foto_url: user.foto_url,
+            }
+        })
+
+    } catch (error) {
+        console.error('Error al verificar sesión: ', error)
+        res.status(500).json({ error: 'Error interno del servidor al verificar sesión' })
+    }
+}
