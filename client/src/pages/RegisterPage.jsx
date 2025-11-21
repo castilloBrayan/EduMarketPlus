@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
+const DEFAULT_PHOTO_URL = '/default-avatar.png'
+
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
         nombre: '',
@@ -27,6 +29,12 @@ const RegisterPage = () => {
         setSuccess('')
         setLoading(true)
 
+        let finalFotoUrl = formData.foto_url.trim()
+
+        if (finalFotoUrl === '') {
+            finalFotoUrl = DEFAULT_PHOTO_URL
+        }
+
         try {
             // Validaciones básicas en el frontend (complemento a las del back)
             if (formData.contraseña.length < 6) {
@@ -40,8 +48,10 @@ const RegisterPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // Enviar el objeto completo (el backend maneja la foto_url nula si no se envía)
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    foto_url: finalFotoUrl,
+                }),
             })
 
             const data = await response.json()
