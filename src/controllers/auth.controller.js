@@ -212,3 +212,23 @@ export const updateUserRole = async (req, res) => {
         })
     }
 }
+
+/**
+ * Cierra la sesión del usuario limpiando la cookie JWT.
+ * POST /api/auth/logout
+ */
+export const logoutUser = (req, res) => {
+    // Limpiar la cookie 'token'
+    res.clearCookie('token', {
+        httpOnly: true,
+        // Para entornos de producción es recomendable usar:
+        // secure: process.env.NODE_ENV === 'production', // Solo enviar con HTTPS en producción
+        //En este caso se usará:
+        secure: false, // Permite que la cookie se envíe sobre HTTP (localhost)
+        sameSite: 'strict',
+    })
+
+    res.status(200).json({
+        message: 'Sesión cerrada exitosamente'
+    })
+}
