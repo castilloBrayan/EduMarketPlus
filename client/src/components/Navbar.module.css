@@ -1,0 +1,101 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--surface-color);
+    box-shadow: var(--shadow-light);
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbarBrand { /* Usamos camelCase para evitar conflictos con clases globales */
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.navbarLinks {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.navItem {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 0.25rem;
+    transition: color 0.2s;
+}
+
+.navItem:hover {
+    color: var(--primary-color);
+}
+
+.createCourseBtn {
+    /* Mantenemos los estilos de botón global, solo ajustamos colores */
+    background-color: var(--accent-color);
+    color: var(--surface-color);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.createCourseBtn:hover {
+    background-color: #1e7e34;
+}
+
+/* --- Sección de Usuario Logueado --- */
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.userAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.userName {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.logoutButton {
+    background-color: var(--error-color);
+    color: var(--surface-color);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 20px;
+}
+.logoutButton:hover {
+    background-color: #bd2130;
+}
+
+/* --- Media Queries --- */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .navbarLinks {
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .userName {
+        display: none;
+    }
+}
