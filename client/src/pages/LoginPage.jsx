@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
+
+import styles from './Auth.module.css'
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -55,41 +57,47 @@ const LoginPage = () => {
     }
 
     return (
-        <div className="auth-container">
+        <div className={styles.authContainer}>
         
-            <h2>Iniciar Sesión</h2>
-            
-            {error && <p className="error-message">{error}</p>}
-            
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="correo">Correo:</label>
-                    <input
-                        type="email"
-                        id="correo"
-                        name="correo"
-                        value={formData.correo}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+            <div className={styles.authCard}>
+                <h2>Iniciar Sesión</h2>
+                
+                {error && <p className="error-message">{error}</p>}
+                
+                <form onSubmit={handleSubmit}>
+                    <div>
+                        <label htmlFor="correo"></label>
+                        <input
+                            type="email"
+                            id="correo"
+                            name="correo"
+                            placeholder='Ingresa tu correo'
+                            value={formData.correo}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div>
-                    <label htmlFor="contraseña">Contraseña:</label>
-                    <input
-                        type="password"
-                        id="contraseña"
-                        name="contraseña"
-                        value={formData.contraseña}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    <div>
+                        <label htmlFor="contraseña"></label>
+                        <input
+                            type="password"
+                            id="contraseña"
+                            name="contraseña"
+                            placeholder='Ingresa tu contraseña'
+                            value={formData.contraseña}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Cargando...' : 'Entrar'}
-                </button>
-            </form>
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Cargando...' : 'Entrar'}
+                    </button>
+                </form>
+
+                <Link to="/register">¿No tienes cuenta? <span style={{ color: '#ffffffff' }}>Regístrate aquí</span></Link>
+            </div>
         </div>
     )
 }
