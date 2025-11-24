@@ -61,7 +61,7 @@ h1 {
 }
 
 button {
-  color: var(--surface-color);
+  color: var(--text-color);
   border-radius: 4px;
   /* border-radius: 8px; */
   border: none;
