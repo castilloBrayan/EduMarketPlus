@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
+import styles from './Navbar.module.css'
 
 const Navbar = () => {
     // Obtener el estado del usuario logueado y la función para desloguear
@@ -26,40 +27,39 @@ const Navbar = () => {
     }
 
     return (
-        <nav className="navbar">
-            <Link to="/" className="navbar-brand">
+        <nav className={styles.navbar}>
+            <Link to="/" className={styles.navbarBrand}>
                 EduMarket+
             </Link>
 
-            <div className="navbar-links">
-                <Link to="/" className="nav-item">Catálogo</Link>
+            <div className={styles.navbarLinks}>
+                <Link to="/" className={styles.navItem}>Catálogo</Link>
 
                 {/* Enlace condicional, crear curso (solo para admin e instructor) */}
                 {(user.rol === 'Admin' || user.rol === 'Instructor') && (
-                    <Link to="/instructor/create" className="nav-item create-course-btn">Crear Curso</Link>
+                    <Link to="/instructor/create" className={styles.createCourseBtn}>Crear Curso</Link>
                 )}
 
                 {/* Sección de Autenticación Condicional */}
                 {user.isLoggedIn ? (
                     // Vista Logueada: Nombre, Foto y Logout
-                    <div className="user-info">
+                    <div className={styles.userInfo}>
                         <img 
                             src={user.foto_url}
                             alt={user.nombre}
-                            className="user-avatar"
+                            className={styles.userAvatar}
                         />
                         
-                        <span className="user-name">Hola {user.nombre}, ({user.rol})</span>
-                        <button onClick={handleLogout} className="logout-button">
+                        <span className={styles.userName}>Hola {user.nombre}, ({user.rol})</span>
+                        <button onClick={handleLogout} className={styles.logoutButton}>
                             Cerrar Sesión
                         </button>
                     </div>
                 ) : (
                     // Vista No Logueada: Login y Registro
-
                     <>
-                    <Link to="/login" className="nav-item">Iniciar Sesión</Link>
-                    <Link to="/register" className="nav-item register-btn">Registrarse</Link>
+                    <Link to="/login" className={styles.navItem}>Iniciar Sesión</Link>
+                    <Link to="/register" className={styles.navItem}>Registrarse</Link>
                     </>
                 )}
             </div>
