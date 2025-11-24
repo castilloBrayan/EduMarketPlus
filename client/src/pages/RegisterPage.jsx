@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
+import styles from './Auth.module.css'
+
 const DEFAULT_PHOTO_URL = '/default-avatar.png'
 
 const RegisterPage = () => {
@@ -77,43 +79,44 @@ const RegisterPage = () => {
     }
 
     return (
-        <div className="auth-container">
-            
-            <h2>Registro de Usuario</h2>
+        <div className={styles.authContainer}>
 
-            {error && <p className="error-message">{error}</p>}
+            <div className={styles.authCard}>
 
-            {success && <p className="success-message">{success}</p>}
+                <h2>Registro de Usuario</h2>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} required />
-                </div>
+                {error && <p className="error-message">{error}</p>}
 
-                <div>
-                    <label htmlFor="correo">Correo:</label>
-                    <input type="email" id="correo" name="correo" value={formData.correo} onChange={handleChange} required />
-                </div>
+                {success && <p className="success-message">{success}</p>}
 
-                <div>
-                    <label htmlFor="contraseña">Contraseña:</label>
-                    <input type="password" id="contraseña" name="contraseña" value={formData.contraseña} onChange={handleChange} required />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div>
+                        <label htmlFor="nombre"></label>
+                        <input type="text" id="nombre" name="nombre" placeholder='Elije un nombre' value={formData.nombre} onChange={handleChange} required />
+                    </div>
 
-                <div>
-                    <label htmlFor="foto_url">Foto:</label>
-                    <input type="text" id="foto_url" name="foto_url" value={formData.foto_url} onChange={handleChange} />
-                </div>
+                    <div>
+                        <label htmlFor="correo"></label>
+                        <input type="email" id="correo" name="correo" placeholder='Ingresa tu correo preferido ' value={formData.correo} onChange={handleChange} required />
+                    </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Registrando...' : 'Registrarme'}
-                </button>
-            </form>
+                    <div>
+                        <label htmlFor="contraseña"></label>
+                        <input type="password" id="contraseña" name="contraseña" placeholder='Crea una contraseña' value={formData.contraseña} onChange={handleChange} required />
+                    </div>
 
-            <p>
-                ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
-            </p>
+                    <div>
+                        <label htmlFor="foto_url"></label>
+                        <input type="url" id="foto_url" name="foto_url" placeholder='Elije una foto para tu perfil' value={formData.foto_url} onChange={handleChange} />
+                    </div>
+
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Registrando...' : 'Registrarme'}
+                    </button>
+                </form>
+                
+                <Link to="/login">¿Ya tienes cuenta? <span style={{ color: '#ffffffff' }}>Inicia Sesión</span></Link>
+            </div>
         </div>
     )
 }

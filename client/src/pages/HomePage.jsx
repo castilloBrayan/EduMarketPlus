@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import CourseCard from '../components/CourseCard'
 
+import styles from './HomePage.module.css'
+
 const HomePage = () => {
     const [courses, setCourses] = useState([])
     const [loading, setLoading] = useState(true)
@@ -32,11 +34,11 @@ const HomePage = () => {
     }, []) // Se ejecuta solo al montar el componente (sin dependencias)
 
     if (loading) {
-        return <div className="loading-state">Cargando catálogo...</div>
+        return <div className={styles.loadingMessage}>Cargando catálogo...</div>
     }
 
     if (error) {
-        return <div className="error-state">Error: {error}</div>
+        return <div className={styles.errorMessage}>Error: {error}</div>
     }
 
     if (courses.length === 0) {
@@ -44,19 +46,23 @@ const HomePage = () => {
     }
 
     return (
-        <div className="catalog-container">
-            <h1>Catálogo de Cursos</h1>
+        <div className="home-page">
+            <h1 className={styles.homePageTitle}>Catálogo de Cursos</h1>
 
             <p>Explora las opciones disponibles en EduMarket+</p>
 
             {/* Grid o Flexbox para mostrar las tarjetas */}
 
-            <div className="course-list">
-                {courses.map((course) => (
-                    // Renderizar el componente CourseCard por cada curso
-                    <CourseCard key={course.id} course={course} />
-                ))}
-            </div>
+            {courses.length === 0 ? (
+                <div className={styles.loadingMessage}>No hay cursos disponibles en este momento</div>
+            ) : (
+                <div className={styles.coursesGrid}>
+                    {courses.map((course) => (
+                        // Renderizar el componente CourseCard por cada curso
+                        <CourseCard key={course.id} course={course} /> 
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

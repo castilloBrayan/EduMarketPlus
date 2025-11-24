@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+import styles from './CourseCard.module.css'
+
 /**
  * Muestra la información esencial de un curso
  * La función necesita un objeto con los datos del curso (titulo, imagen_url...)
@@ -23,26 +25,35 @@ const CourseCard = ({ course }) => {
     }).format(precio)
 
     return (
-        // Uso de Link para navegar al detalle del curso (S1-FE-016)
-        <Link to={`/courses/${id}`} className="course-card-link">
-            <div className="course-card">
-                <img 
-                    src={imagen_url || 'placeholder_url'} // URL de imagen por defecto si no hay
-                    alt={`Imagen de ${titulo}`}
-                    className="course-image"
-                />
-                <div className="card-body">
-                    <h3 className="card-title">{titulo}</h3>
+        <div className={styles.courseCard}>
 
-                    <p className="card-instructor">Instructor: {instructor_nombre}</p>
+            {/* Uso de Link para navegar al detalle del curso (S1-FE-016) */}
+            <Link to={`/courses/${id}`} className={styles.cardLink}>
+                <div className="course-card">
+                    <img 
+                        src={imagen_url || 'placeholder_url'} // URL de imagen por defecto si no hay
+                        alt={`Imagen de ${titulo}`}
+                        className={styles.courseImage}
+                    />
+                    <div className={styles.cardContent}>
+                        <h3 className="card-title">{titulo}</h3>
 
-                    <div className="card-footer">
-                        <span className="card-classification">{clasificacion}</span>
-                        <span className="card-price">{formattedPrice}</span>
+                        <p className={styles.instructor}>Instructor: {instructor_nombre}</p>
+
+                        <span className={styles.classification}>Nivel: {clasificacion}</span>
+                        
+                        <p className={styles.price}>{formattedPrice}</p>
+
+                        {/* <div className="card-footer">
+                            <span className={styles.classification}>{clasificacion}</span> <br></br>
+                            <span className={styles.price}>{formattedPrice}</span>
+                        </div> */}
+
+                        <button className={styles.detailsButton}>Agregar al carrito</button>
                     </div>
                 </div>
-            </div>
-        </Link>
+            </Link>
+        </div>
     )
 }
 

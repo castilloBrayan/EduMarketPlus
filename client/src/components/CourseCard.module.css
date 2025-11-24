@@ -1,0 +1,72 @@
+.courseCard {
+    background-color: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light); /* Sombra suave definida globalmente */
+    overflow: hidden; 
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    height: 100%; 
+    display: flex;
+    flex-direction: column;
+}
+
+.courseCard:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra más fuerte al pasar el cursor: ; */
+}
+
+.courseImage {
+    width: 100%;
+    height: 180px; 
+    object-fit: cover; 
+}
+
+.cardContent {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; 
+}
+
+.cardContent h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    line-height: 1.3;
+}
+
+.instructor {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.75rem;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-color); /* Color de acento (verde) para el precio */
+    margin-top: auto; /* Empuja el precio hacia el fondo */
+    margin-bottom: 0.5rem;
+}
+
+.cardLink {
+    text-decoration: none; 
+    color: inherit; 
+}
+
+.detailsButton {
+    /* Utiliza el estilo base de botón global */
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.6rem;
+}
+
+.classification {
+    display: inline-block;
+    background-color: #2F4055;
+    color: var(--secondary-color);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
