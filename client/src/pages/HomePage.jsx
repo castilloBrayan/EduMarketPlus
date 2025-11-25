@@ -47,9 +47,7 @@ const HomePage = () => {
 
     return (
         <div className="home-page">
-            <h1 className={styles.homePageTitle}>Catálogo de Cursos</h1>
-
-            <p>Explora las opciones disponibles en EduMarket+</p>
+            <h1 className={styles.homePageTitle}>Todos nuestros cursos</h1>
 
             {/* Grid o Flexbox para mostrar las tarjetas */}
 
