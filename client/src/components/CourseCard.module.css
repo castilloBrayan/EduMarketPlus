@@ -1,7 +1,7 @@
 .courseCard {
     background-color: var(--surface-color);
     border-radius: 8px;
-    box-shadow: var(--shadow-light); /* Sombra suave definida globalmente */
+    box-shadow: var(--shadow-light);
     overflow: hidden; 
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     height: 100%; 
@@ -10,42 +10,58 @@
 }
 
 .courseCard:hover {
-    transform: translateY(-5px); 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra más fuerte al pasar el cursor: ; */
+    transform: translateY(-10px); 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.534); /* Sombra más fuerte al pasar el cursor: ; */
 }
 
 .courseImage {
     width: 100%;
-    height: 180px; 
+    height: 200px; 
     object-fit: cover; 
 }
 
 .cardContent {
-    padding: 1rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; 
+    flex-grow: 1;
 }
 
 .cardContent h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+font-size: 1.2rem;
     color: var(--text-color);
-    line-height: 1.3;
+    
+    /* Definir Height fijo para reservar siempre 3 líneas */
+    /* Cálculo: font-size (1.2rem) * line-height (1.4) * 2 líneas = ~3.36rem */
+    line-height: 1.4;
+    height: 3.36rem; 
+    margin-bottom: 0.5rem;
+
+    /* Mantener el truncado (...) si pasa de 3 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    text-align: left;
+
+    /* Opcional: permite partir palabras largas si es necesario para justificar mejor */
+    hyphens: auto;
 }
 
 .instructor {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--secondary-color);
     margin-bottom: 0.75rem;
+    text-align: left;
 }
 
 .price {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: var(--accent-color); /* Color de acento (verde) para el precio */
-    margin-top: auto; /* Empuja el precio hacia el fondo */
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.7rem;
+    text-align: left;
 }
 
 .cardLink {
@@ -57,16 +73,17 @@
     /* Utiliza el estilo base de botón global */
     width: 100%;
     margin-top: 0.5rem;
-    padding: 0.6rem;
+    padding: 0.55rem;
+    
 }
 
 .classification {
     display: inline-block;
     background-color: #2F4055;
     color: var(--secondary-color);
-    font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
     font-weight: 600;
+    text-align: left;
 }

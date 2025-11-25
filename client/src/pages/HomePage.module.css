@@ -1,16 +1,16 @@
 .homePageTitle {
-    font-size: 2.5rem;
-    color: var(--text-color);
+    font-size: 1.7rem;
+    color: var(--text-color-secondary);
+    margin-top: 1.5rem;
     margin-bottom: 1.5rem;
-    text-align: center;
+    text-align: left;
 }
 
 .coursesGrid {
     display: grid;
-    /* Usa grid-template-columns: repeat(auto-fill, minmax(ancho, 1fr)) para un grid responsivo */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-    gap: 2rem;
-    padding-bottom: 3rem;
+    gap: 1.5rem;
+    /* Ahora: minmax(320px, 1fr)  <- Prueba con 300px, 320px o 350px */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 }
 
 /* Estilos para los mensajes de estado */

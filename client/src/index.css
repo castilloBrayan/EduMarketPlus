@@ -6,6 +6,7 @@
   --surface-color: #20303B;     /* Color de superficie (cards, navbar) */
   --surface-color-secondary: #2F4055;     /* Color de superficie secundario */
   --text-color: #ffffff;        /* Texto principal */
+  --text-color-secondary: #C6CDD2;        /* Texto secundario */
   --error-color: #dc3545;       /* Rojo para mensajes de error */
   --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.144); /* Sombra suave para cards */
   --spacing: 1rem;
@@ -43,11 +44,6 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-color);
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 #root {
