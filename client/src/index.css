@@ -1,6 +1,6 @@
 :root {
   --background-color: #1B2832;  
-  --primary-color: #1C6CCD;     /* Azul brillante para botones principales */
+  --primary-color: #0e7bff;     /* Azul brillante para botones principales */
   --secondary-color: #888f96;   /* Gris para texto secundario */
   --accent-color: #0DAA7E;      /* Verde para acciones de éxito/precios */
   --surface-color: #20303B;     /* Color de superficie (cards, navbar) */
@@ -67,7 +67,7 @@ button {
   font-size: 1rem;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--primary-color);
+  background-color: #0068d6;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
   /* transition: border-color 0.25s; */
@@ -80,7 +80,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 button:hover:not(:disabled) {
-  background-color: #0056b3; /* Tono más oscuro */
+  background-color: var(--primary-color);
   transform: translateY(-1px);
 }
 button:disabled {
