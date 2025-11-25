@@ -59,7 +59,7 @@ const Navbar = () => {
                     // Vista No Logueada: Login y Registro
                     <>
                     <Link to="/login" className={styles.navItem}>Iniciar Sesión</Link>
-                    <Link to="/register" className={styles.navItem}>Registrarse</Link>
+                    <Link to="/register" className={styles.navItemSignUp}>Registrarse</Link>
                     </>
                 )}
             </div>
