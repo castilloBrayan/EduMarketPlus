@@ -18,6 +18,14 @@
     text-decoration: none;
 }
 
+.navbarBrand:hover {
+    color: var(--primary-color);
+}
+
+a:hover {
+  color: #ffffff
+}
+
 .navbarLinks {
     display: flex;
     align-items: center;
@@ -30,10 +38,29 @@
     font-size: 1rem;
     padding: 0.5rem 0.25rem;
     transition: color 0.2s;
+    border-radius: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .navItem:hover {
-    color: var(--primary-color);
+    background-color: rgba(179, 179, 179, 0.11);
+}
+
+.navItemSignUp {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 0.25rem;
+    transition: color 0.2s;
+    border-radius: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: rgba(0, 140, 255, 0.253);
+}
+
+.navItemSignUp:hover {
+    background-color: rgba(0, 140, 255, 0.527);
 }
 
 .createCourseBtn {
@@ -77,7 +104,7 @@
     border-radius: 20px;
 }
 .logoutButton:hover {
-    background-color: #bd2130;
+    background-color: rgba(179, 17, 39, 0.781);
 }
 
 /* --- Media Queries --- */

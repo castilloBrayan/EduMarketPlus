@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 // import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
+import styles from './CourseDetailPage.module.css'
+import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
+
 const CourseDetailPage = () => {
     // Obtener el ID del curso de la URL
     const { id } = useParams()
@@ -42,24 +45,12 @@ const CourseDetailPage = () => {
 
     }, [id]) // Dependencia del ID para recargar si el parámetro cambia
 
-    // Formato del precio (se repite la lógica por componente)
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(price)
-    }
-
     if (loading) {
-        return <div className="loading-state">Cargando detalles del curso...</div>
+        return <div className="loadingMessage">Cargando detalles del curso...</div>
     }
 
-    if (error) {
-        return <div className="error-state">Error: {error}</div>
-    }
-
-    if (!course) {
-        return <div className="empty-state">Curso no encontrado</div>
+    if (error || !course) {
+        return <div className="errorMessage">Error: {error || "Lo sentimos, el curso solicitado no está disponible"}</div>
     }
 
     // Desestructuración de los datos del curso
@@ -72,42 +63,123 @@ const CourseDetailPage = () => {
         instructor_nombre
     } = course
 
+    // Formato para el precio
+    const formattedPrice = new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(precio)
+
+    // return (
+    //     <div className={styles.detailContainer}>
+    //         <div className={styles.mainContent}>
+
+    //             <h1 className={styles.title}>{titulo}</h1>
+
+    //             <p className={styles.subtitle}>{titulo}, domina el nivel {clasificacion} con este curso</p>
+            
+    //             <img 
+    //                 src={imagen_url || 'placeholder_detail_url'}
+    //                 alt={`Imagen principal de ${titulo}`}
+    //                 className={styles.courseImage}
+    //             />
+
+    //             
+
+    //             {/* Sección de Descripción */}
+    //             <h2 className={styles.sectionTitle}>Descripción del Curso</h2>
+    //             <p className={styles.descriptionText}>{descripcion}</p>
+    //             <p className={styles.descriptionText}>Impartido por: <strong>{instructor_nombre}</strong></p>
+
+
+    //             {/* --- Panel Lateral de Compra --- */}
+    //             <div className={styles.sidebar}>
+    //                 <div className={styles.purchaseCard}>
+    //                     <p className={styles.price}>{formattedPrice}</p>
+                        
+    //                     <button className={styles.buyButton}>Añadir al Carrito</button>
+                        
+    //                     <div className={styles.instructorInfo}>
+    //                         <p>Impartido por:</p>
+    //                         <p><strong>{instructor_nombre}</strong></p>
+    //                         <p>Nivel: <strong>{clasificacion}</strong></p>
+    //                     </div>
+    //                 </div>
+    //             </div>
+
+    //             <Link to="/" className="back-link">Volver al Catálogo</Link>
+    //         </div>
+    //     </div>
+    // )
+
     return (
-        <div className="course-detail-container">
-            <div className="course-header">
-                <img 
-                    src={imagen_url || 'placeholder_detail_url'}
-                    alt={`Imagen principal de ${titulo}`}
-                    className="course-detail-image"
-                />
+        <div className={styles.heroBackground}> {/* Contenedor general */}
+        <h1 className={styles.title}>{titulo}</h1>
 
-                <div className="header-info">
-                    <h1>{titulo}</h1>
-                    <p className="classification-tag">{clasificacion}</p>
-                    <p className="instructor-info">Impartido por: <strong>{instructor_nombre}</strong></p>
+            <div className={`content-wrap ${styles.detailContainer}`}>
+                
+                {/* Columna Izquierda */}
+                <div className={styles.leftColumn}>
+                    <p className={styles.shortDescription}>{descripcion}</p> 
+
+                    {/* TODO: Tags de Categoría */}
+                    {/* <div>
+                            {categories.map((cat, index) => (
+                                <span key={index} className={styles.categoryTag}>{cat}</span>
+                            ))}
+                        </div> 
+                    */}
+
+                </div>
+
+                {/* Columna Derecha */}
+                <div className={styles.rightColumn}>
+
+                    <img
+                        src={imagen_url}
+                        alt={titulo}
+                        className={styles.courseMainImage}
+                    />
                     
-                    {/* TODO: Implementar lógica de promedio de rating del Proyecto Final */}
+                    {/* TODO: Recopilar metadata del video */}
+                    <div className={styles.imageMeta}>
+                        <div className={styles.metaRow}>
+                            <FaCalendarAlt className={styles.metaIcon} />
+                            <span>Dic 2025</span> <hr />
+                            <FaClock className={styles.metaIcon} />
+                            <span>0 h</span> <hr />
+                            <span className={styles.classificationTag}>{clasificacion}</span> <hr />
+                            <span className={styles.instructorBadge}>{instructor_nombre}</span>
+                        </div>
+                    </div>
 
-                    <div className="purchase-box">
-                        <span className="course-price">{formatPrice(precio)}</span>
-                        
-                        {/* TODO: El botón de compra se implementará en otro sprint (Carrito) */}
-                        
-                        <button className="buy-button">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <div className={`content-wrap ${styles.detailContainer}`}>
+                
+                {/* Columna Izquierda */}
+                <div className={styles.leftColumn}>
+                    
+                </div>
+
+                {/* Columna Derecha */}
+                <div className={styles.rightColumn}>
+                    {/* Botón de Compra */}
+                    <div className={styles.purchaseCard}>
+                        <button className={styles.buyButton}>
+                            <FaShoppingCart className={styles.buyButtonIcon} />
+                            <span>Comprarlo por {formattedPrice}</span>
+                        </button>
+                        Obten acceso de por vida solo a este curso
                     </div>
                 </div>
             </div>
 
-            <div className="course-content">
-                <h2>Descripción del Curso</h2>
-                <p>{descripcion}</p>
-
-                {/* TODO: Implementar secciones de Temas (comprado), Comentarios y Rating */}
-
-                <Link to="/" className="back-link">Volver al Catálogo</Link>
-            </div>
+            {/* TODO: Implementar lógica de promedio de rating del Proyecto Final */}
+            {/* TODO: Implementar secciones de Temas (comprado), Comentarios y Rating */}
         </div>
-    )
+    );
+
 }
 
 export default CourseDetailPage
