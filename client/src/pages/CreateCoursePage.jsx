@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
 
@@ -17,16 +17,84 @@ const CreateCoursePage = () => {
         clasificacion: 'Basico', // Valor inicial
     })
 
+    // Estados de la UI/Mensajes
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [loading, setLoading] = useState(false)
 
+    // Estados para Metadatos de YouTube (S2-DT-X01)
+    const [videoMetadata, setVideoMetadata] = useState(null)
+    const [videoValidationLoading, setVideoValidationLoading] = useState(false)
+    const [videoValidationError, setVideoValidationError] = useState('')
+
+    // Handlers del Formulario
     const handleChange = (e) => {
+        const { name, value } = e.target
+
         // Si el campo es precio, convertir a número flotante
-        const value = e.target.name === 'precio' ? parseFloat(e.target.value) : e.target.value
-        setFormData({ ...formData, [e.target.name]: value })
+        const finalValue = name === 'precio' ? parseFloat(value) : value
+        
+        setFormData(prev => ({ ...prev, [name]: finalValue }))
+
+        // Al cambiar la URL del video,
+            // resetear el estado de la validación anterior
+        if (name === 'video_url') {
+            setVideoMetadata(null)
+            setVideoValidationError('')
+        }
     }
 
+    // Función de Extracción de Metadatos (S2-DT-X01)
+    const handleVideoUrlValidation = useCallback(async () => {
+        const url = formData.video_url.trim()
+        if (!url) {
+            setVideoValidationError('Por favor, ingresa una URL de YouTube')
+            setVideoMetadata(null)
+            return
+        }
+
+        setVideoValidationLoading(true)
+        setVideoValidationError('')
+        setVideoMetadata(null)
+
+        try {
+            // Llamada al endpoint del backend de Metadatos de YouTube
+            const response = await fetch(`/api/youtube/metadata?url=${encodeURIComponent(url)}`)
+            const result = await response.json()
+
+            if (response.ok) {
+                // Éxito, guardar los metadatos
+                setVideoMetadata(result.data)
+                setVideoValidationError('') // Limpiar errores si había
+            } else {
+                // Error mostrar error del backend (URL inválida, video no encontrado)
+                setVideoValidationError(result.error || 'No se pudo obtener la información del video')
+            }
+
+        } catch (err) {
+            console.error('Error de red al validar URL: ', err)
+            setVideoValidationError('Error de conexión con el servidor de validación')
+        } finally {
+            setVideoValidationLoading(false)
+        }
+    }, [formData.video_url]) // Agregar 'video_url' como dependencia
+    
+    // Formatea la duración para mostrarla al usuario
+    const formattedDuration = useMemo(() => {
+        if (!videoMetadata || !videoMetadata.duration) return null
+        
+        const { hours, minutes, seconds } = videoMetadata.duration
+        
+        let parts = []
+        if (hours > 0) parts.push(`${hours}h`)
+        if (minutes > 0) parts.push(`${minutes}m`)
+        // Mostrar segundos solo si no hay horas ni minutos o si es muy corto
+        if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`) 
+        
+        return parts.join(' ')
+    }, [videoMetadata])
+
+    // Función de Creación de Curso
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
@@ -39,6 +107,12 @@ const CreateCoursePage = () => {
             return
         }
         
+        // Pre-validación, forzar que si hay URL, esta haya sido validada (o no hay URL)
+        if (formData.video_url.trim() && !videoMetadata) {
+             setError('Por favor, valida la URL del video antes de publicar el curso')
+             setLoading(false)
+             return
+        }
         // Mandar instructor_id como ID del usuario logueado
         const courseData = {
             ...formData,
@@ -51,7 +125,7 @@ const CreateCoursePage = () => {
             const response = await fetch('/api/courses', {
                 method: 'POST',
                 headers: {
-                'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(courseData),
             })
@@ -114,7 +188,7 @@ const CreateCoursePage = () => {
                     <input type="url" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleChange} required />
                 </div>
 
-                {/* URL de Video */}
+                {/* URL de Video (S2-DT-038) + Validacion de metadatos (S2-DT-X01) */}
                 <div>
                     <label htmlFor="video_url">URL de Video (YouTube):</label>
                     <input 
@@ -126,6 +200,44 @@ const CreateCoursePage = () => {
                         placeholder="Ej: https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
                         required
                     />
+                </div>
+
+                <div>
+                    <label htmlFor="video_url">URL de Video (YouTube):</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                         <input 
+                            type="url" 
+                            id="video_url" 
+                            name="video_url" 
+                            value={formData.video_url} 
+                            onChange={handleChange} 
+                            placeholder="https://www.youtube.com/watch?v=..." 
+                            style={{ flexGrow: 1 }}
+                            required
+                        />
+                        <button
+                            type="button" 
+                            onClick={handleVideoUrlValidation} 
+                            disabled={!formData.video_url.trim() || videoValidationLoading}
+                            style={{ padding: '0.6em 1em', whiteSpace: 'nowrap' }}
+                        >
+                            {videoValidationLoading ? 'Validando...' : 'Validar Video'}
+                        </button>
+                    </div>
+                   
+                    {/* Feedback de validación */}
+                    {videoValidationError && 
+                        <p style={{ color: 'red', fontSize: '0.9em', marginTop: '0.5rem' }}>
+                            {videoValidationError}
+                        </p>
+                    }
+                    {videoMetadata && 
+                        <p style={{ color: 'blue', fontSize: '0.9em', marginTop: '0.5rem' }}>
+                            <span style={{ fontWeight: 'bold' }}>Validado: </span>
+                            Duración: {formattedDuration} | 
+                            Publicado: {new Date(videoMetadata.publishedDate).toLocaleDateString()}
+                        </p>
+                    }
                 </div>
 
                 {/* Precio */}
@@ -151,7 +263,10 @@ const CreateCoursePage = () => {
                     </select>
                 </div>
 
-                <button type="submit" disabled={loading}>
+                <button 
+                    type="submit" 
+                    disabled={loading || videoValidationLoading} // Deshabilitar si se está validando el video
+                >
                     {loading ? 'Creando...' : 'Publicar Curso'}
                 </button>
             </form>
