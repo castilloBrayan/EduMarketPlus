@@ -20,12 +20,19 @@ export const createCourse = async (req, res) => {
         imagen_url,
         video_url
         // NOTE: Las categorías y la imagen secundaria no se incluyen en S1 según el ticket
-    } = req.body
+    } = req.body || {}
 
     // Validación de Campos No Nulos (Requerimiento)
     if (!titulo || !descripcion || precio === undefined || !clasificacion) {
         return res.status(400).json({
             error: 'Faltan campos obligatorios: título, descripción, precio y clasificación'
+        })
+    }
+
+    // Longitud del Título Mínimo 3, Máximo 255 (S2-DT-039)
+    if (titulo.length < 3 || titulo.length > 255) {
+        return res.status(400).json({
+            error: 'El título del curso debe tener entre 3 y 255 caracteres'
         })
     }
 

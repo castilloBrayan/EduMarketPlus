@@ -58,21 +58,32 @@ const CreateCoursePage = () => {
 
             const data = await response.json()
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Fallo al crear el curso')
+            if (response.ok) {
+                // Éxito:
+                const createdCourseId = data.courseId
+                
+                // Mostrar el mensaje de éxito
+                setSuccess(`Curso "${formData.titulo}" creado exitosamente Redirigiendo...`)
+                // Desactivar el loading, lo que evita un bloque finally
+                setLoading(false) 
+
+                // Timeout para permitir que el mensaje se muestre
+                    // y para evitar 'race conditions' al navegar
+                setTimeout(() => {
+                    navigate(`/courses/${createdCourseId}`)
+                }, 500) // Redirigir después de 0.5 segundos
+
+            } else {
+                // Error (como la validación 400 del backend)
+                setError(data.error || 'Ocurrió un error al crear el curso')
+                setLoading(false) // Desactivar loading en caso de error
             }
-
-            setSuccess('Curso creado exitosamente: ' + data.data.titulo)
             
-            // Redirigir al detalle del curso 
-            navigate(`/courses/${data.data.id}`)
-
         } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+            console.error('Error de red/petición: ', err)
+            setError('Error de conexión con el servidor. Intenta de nuevo.')
+            setLoading(false) // Desactivar loading en caso de error de red
         }
-
     }
 
     return (
