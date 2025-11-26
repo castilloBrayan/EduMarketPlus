@@ -12,6 +12,7 @@ async function setupCourseModel() {
         precio DECIMAL(10, 2) NOT NULL,
         clasificacion VARCHAR(50) NOT NULL,
         imagen_url VARCHAR(255) NULL,
+        video_url VARCHAR(255) NULL,
         instructor_id INT NOT NULL,
       
         -- Definición de la Llave Foránea
