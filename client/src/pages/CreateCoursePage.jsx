@@ -1,4 +1,3 @@
-// client/src/pages/CreateCoursePage.jsx
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
@@ -12,9 +11,10 @@ const CreateCoursePage = () => {
         titulo: '',
         descripcion: '',
         imagen_url: '',
+        video_url: '',
         precio: 0,
         categoria: '',
-        clasificacion: 'Básico', // Valor inicial
+        clasificacion: 'Basico', // Valor inicial
     })
 
     const [error, setError] = useState('')
@@ -76,7 +76,7 @@ const CreateCoursePage = () => {
     }
 
     return (
-        <div className="create-course-container">
+        <div className="content-wrap">
             <h2>Crear Nuevo Curso</h2>
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
@@ -103,6 +103,20 @@ const CreateCoursePage = () => {
                     <input type="url" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleChange} required />
                 </div>
 
+                {/* URL de Video */}
+                <div>
+                    <label htmlFor="video_url">URL de Video (YouTube):</label>
+                    <input 
+                        type="url" 
+                        id="video_url" 
+                        name="video_url" 
+                        value={formData.video_url} 
+                        onChange={handleChange} 
+                        placeholder="Ej: https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+                        required
+                    />
+                </div>
+
                 {/* Precio */}
                 <div>
                     <label htmlFor="precio">Precio (USD):</label>
@@ -110,6 +124,7 @@ const CreateCoursePage = () => {
                 </div>
 
                 {/* Categoría */}
+                {/* TODO: Debe ser una lista de categorias (tags) */}
                 <div>
                     <label htmlFor="categoria">Categoría Principal:</label>
                     <input type="text" id="categoria" name="categoria" value={formData.categoria} onChange={handleChange} placeholder="Ej: Programación, Diseño" required />
