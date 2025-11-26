@@ -17,7 +17,8 @@ export const createCourse = async (req, res) => {
         descripcion,
         precio,
         clasificacion,
-        imagen_url
+        imagen_url,
+        video_url
         // NOTE: Las categorías y la imagen secundaria no se incluyen en S1 según el ticket
     } = req.body
 
@@ -46,8 +47,8 @@ export const createCourse = async (req, res) => {
     try {
         const insertQuery = `
             INSERT INTO cursos
-            (titulo, descripcion, precio, clasificacion, imagen_url, instructor_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (titulo, descripcion, precio, clasificacion, imagen_url, video_url, instructor_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `
         const [result] = await pool.execute(insertQuery, [
             titulo,
@@ -55,6 +56,7 @@ export const createCourse = async (req, res) => {
             parseFloat(precio),
             clasificacion,
             imagen_url || null, // Permite NULL si no se proporciona imagen_url
+            video_url || null, // Permite NULL si no se proporciona video_url
             instructor_id
         ])
 
@@ -89,6 +91,7 @@ export const listCourses = async (req, res) => {
                 c.precio, 
                 c.clasificacion, 
                 c.imagen_url,
+                c.video_url,
                 c.instructor_id,
                 u.nombre AS instructor_nombre,
                 u.foto_url AS instructor_foto_url
@@ -133,7 +136,8 @@ export const getCourseDetails = async (req, res) => {
                 c.descripcion,
                 c.precio,
                 c.clasificacion,
-                c.imagen_url
+                c.imagen_url,
+                c.video_url,
                 c.instructor_id,
                 u.nombre AS instructor_nombre,
                 u.foto_url AS instructor_foto_url
