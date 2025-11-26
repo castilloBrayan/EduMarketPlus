@@ -80,7 +80,7 @@ const CreateCoursePage = () => {
             }
             
         } catch (err) {
-            console.error('Error de red/petición: ', error)
+            console.error('Error de red/petición: ', err)
             setError('Error de conexión con el servidor. Intenta de nuevo.')
             setLoading(false) // Desactivar loading en caso de error de red
         }
