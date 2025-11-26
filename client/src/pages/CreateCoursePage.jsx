@@ -119,7 +119,7 @@ const CreateCoursePage = () => {
                 <div>
                     <label htmlFor="clasificacion">Clasificación:</label>
                     <select id="clasificacion" name="clasificacion" value={formData.clasificacion} onChange={handleChange}>
-                        <option value="Básico">Básico</option>
+                        <option value="Basico">Básico</option>
                         <option value="Intermedio">Intermedio</option>
                         <option value="Avanzado">Avanzado</option>
                     </select>
