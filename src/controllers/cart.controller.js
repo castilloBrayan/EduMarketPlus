@@ -203,3 +203,114 @@ export const addCourseToCart = async (req, res) => {
         }
     }
 }
+
+/**
+ * Endpoint para eliminar un curso de un carrito de compras
+ * Requiere el ID del detalle_orden (detalle_id) y el ID del usuario (de req.user)
+ * DELETE /api/cart/:detalle_id (Protegida)
+ */
+export const removeCourseFromCart = async (req, res) => {
+    // Obtener IDs
+    const userId = req.user.id
+    const detalleId = parseInt(req.params.id) // ID del detalle de la orden a eliminar
+    
+    if (isNaN(detalleId) || detalleId <= 0) {
+        return res.status(400).json({ error: 'ID de detalle de orden inválido' })
+    }
+
+    let connection
+    try {
+        connection = await pool.getConnection()
+        await connection.beginTransaction() // Iniciar Transacción
+
+        // Verificar que el detalle_orden pertenezca a la orden PENDIENTE del usuario
+        const [detailRows] = await connection.execute(
+            `
+            SELECT do.orden_id, do.precio_al_comprar
+            FROM detalles_orden do
+            JOIN ordenes o ON do.orden_id = o.id
+            WHERE do.id = ? AND o.usuario_id = ? AND o.estado = ?
+            `,
+            [detalleId, userId, PENDING_STATUS]
+        )
+
+        const detail = detailRows[0]
+
+        if (!detail) {
+            await connection.rollback()
+            return res.status(404).json({ error: 'Detalle de curso no encontrado en el carrito activo del usuario' })
+        }
+
+        const cartId = detail.orden_id
+
+        // Eliminar el detalle de la orden (curso)
+        const [deleteResult] = await connection.execute(
+            'DELETE FROM detalles_orden WHERE id = ?',
+            [detalleId]
+        )
+        
+        if (deleteResult.affectedRows === 0) {
+            await connection.rollback()
+            return res.status(500).json({ error: 'Error al eliminar el detalle del carrito' })
+        }
+
+        // Recalcular el nuevo total de la orden
+        // Buscar el total de los detalles restantes
+        const [totalRows] = await connection.execute(
+            `
+            SELECT SUM(precio_al_comprar) AS nuevo_subtotal
+            FROM detalles_orden
+            WHERE orden_id = ?
+            `,
+            [cartId]
+        )
+
+        // Si no quedan detalles, el total es 0.00
+        const nuevoSubtotal = totalRows[0].nuevo_subtotal || 0.00
+        
+        // Actualizar la orden (Carrito)
+
+        // Manejar el caso de Carrito Vacío
+        if (parseFloat(nuevoSubtotal) === 0.00) {
+            // Eliminar la orden PENDIENTE porque está vacía
+            await connection.execute(
+                'DELETE FROM ordenes WHERE id = ?',
+                [cartId]
+            )
+            
+            await connection.commit() // Confirmar Transacción (Eliminación de detalle y orden)
+            
+            // Respuesta específica para carrito vacío
+            return res.status(200).json({
+                message: 'Curso eliminado. El carrito ahora está vacío',
+                cartId: null,
+                nuevoTotal: '0.00',
+            })
+        }
+
+        // Si el carrito no está vacío, solo actualizar el total
+        await connection.execute(
+            'UPDATE ordenes SET total = ? WHERE id = ?',
+            [nuevoSubtotal, cartId]
+        )
+
+        await connection.commit() // Confirmar Transacción (Eliminación de detalle y actualización de total)
+        
+        res.status(200).json({
+            message: 'Curso eliminado del carrito y total actualizado exitosamente',
+            cartId: cartId,
+            nuevoTotal: parseFloat(nuevoSubtotal).toFixed(2),
+        })
+
+    } catch (error) {
+        if (connection) {
+            await connection.rollback() // Deshacer si algo falla
+        }
+        console.error('Error al eliminar curso del carrito: ', error.message)
+        res.status(500).json({ error: 'Error interno del servidor al eliminar el curso del carrito' })
+    } finally {
+        if (connection) {
+            connection.release() // Liberar conexión
+        }
+    }
+}
