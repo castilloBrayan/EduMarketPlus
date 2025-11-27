@@ -9,6 +9,7 @@ import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
 import { setupUserModel } from './src/models/user.model.js'
 import { setupCourseModel } from './src/models/course.model.js'
+import { setupOrderAndDetailModels } from './src/models/order.model.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -34,6 +35,9 @@ await setupUserModel()
 // Ejecutar la creación de la tabla de cursos
 // Es buena práctica esperar a que esta ejecución se complete
 await setupCourseModel()
+
+// Ejecutar la creación de las tablas de órdenes y detalles (S2-DB-022)
+await setupOrderAndDetailModels()
 
 // Establecer la conexión a MongoDB
 connectMongoDB()
