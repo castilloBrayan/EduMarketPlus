@@ -6,20 +6,24 @@ import { pool } from '../config/db.mysql.js'
 async function setupCourseModel() {
     const createCourseTableQuery = `
         CREATE TABLE IF NOT EXISTS cursos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        titulo VARCHAR(255) NOT NULL,
-        descripcion TEXT NOT NULL,
-        precio DECIMAL(10, 2) NOT NULL,
-        clasificacion VARCHAR(50) NOT NULL,
-        imagen_url VARCHAR(255) NULL,
-        video_url VARCHAR(255) NULL,
-        instructor_id INT NOT NULL,
-      
-        -- Definición de la Llave Foránea
-        CONSTRAINT fk_instructor
-            FOREIGN KEY (instructor_id) 
-            REFERENCES usuarios(id)
-            ON DELETE RESTRICT -- No permite eliminar al instructor si tiene cursos asociados
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            titulo VARCHAR(255) NOT NULL,
+            descripcion TEXT NOT NULL,
+            precio DECIMAL(10, 2) NOT NULL,
+            clasificacion VARCHAR(50) NOT NULL,
+            imagen_url VARCHAR(255) NULL,
+            video_url VARCHAR(255) NULL,
+            instructor_id INT NOT NULL,
+
+            -- CAMPOS PARA EL RATING PROMEDIO (S2-INTERACT2-030)
+            rating_promedio DECIMAL(2, 1) DEFAULT 0.0,
+            total_ratings INT DEFAULT 0,
+        
+            -- Definición de la Llave Foránea
+            CONSTRAINT fk_instructor
+                FOREIGN KEY (instructor_id) 
+                REFERENCES usuarios(id)
+                ON DELETE RESTRICT -- No permite eliminar al instructor si tiene cursos asociados
         );
     `
 
@@ -34,5 +38,4 @@ async function setupCourseModel() {
     }
 }
 
-// Exportar la función de configuración del modelo
 export { setupCourseModel }
