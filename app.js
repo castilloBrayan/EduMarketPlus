@@ -4,6 +4,7 @@ import authRoutes from './src/routes/auth.routes.js' // Importar rutas de autent
 import userRoutes from './src/routes/user.routes.js' // Importar las rutas de usuario
 import courseRoutes from './src/routes/course.routes.js' // Importar las rutas de curso
 import youtubeRoutes from './src/routes/youtube.routes.js' // Importar las rutas de YouTube
+import cartRoutes from './src/routes/cart.routes.js' // Importar rutas de Carrito
 
 import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes) // Autenticación (login/register)
 app.use('/api/users', userRoutes) // Gestión de usuarios (cambio de rol)
 app.use('/api/courses', courseRoutes) // Gestión de cursos
 app.use('/api/youtube', youtubeRoutes) // Gestión de metadatos de YouTube
+app.use('/api/cart', cartRoutes) // Montar rutas de Carrito
 
 // Probar la conexión al pool
 testConnection()
