@@ -1,4 +1,5 @@
 import { pool } from '../config/db.mysql.js'
+import { Interaction } from '../models/interaction.model.js'
 
 // Roles y clasificaciones válidas para el contexto del proyecto
 const VALID_CLASSIFICATIONS = ['Basico', 'Intermedio', 'Avanzado']
@@ -132,7 +133,11 @@ export const listCourses = async (req, res) => {
  */
 export const getCourseDetails = async (req, res) => {
     // Capturamos el ID del curso de los parámetros de la URL
-    const courseId = req.params.id
+    const courseId = parseInt(req.params.id) 
+    
+    if (isNaN(courseId) || courseId <= 0) {
+        return res.status(400).json({ error: 'ID de curso inválido' })
+    }
     
     try {
         // Consulta SQL para obtener un curso específico y sus detalles de instructor
@@ -146,6 +151,8 @@ export const getCourseDetails = async (req, res) => {
                 c.imagen_url,
                 c.video_url,
                 c.instructor_id,
+                c.rating_promedio,
+                c.total_ratings,
                 u.nombre AS instructor_nombre,
                 u.foto_url AS instructor_foto_url
             FROM cursos c
@@ -165,10 +172,20 @@ export const getCourseDetails = async (req, res) => {
             })
         }
 
+        // Obtener lista de comentarios/ratings de MongoDB
+        const comments = await Interaction.find(
+            { curso_id: courseId }, 
+            { _id: 0, curso_id: 0, __v: 0 } 
+        )
+        .sort({ fechaPublicacion: -1 }) // Comentarios más recientes primero
+
         // Respuesta exitosa
         res.status(200).json({
             message: 'Detalles del curso recuperados exitosamente',
-            data: course
+            data: {
+                ...course,
+                comentarios: comments,
+            }
         })
 
     } catch (error) {
