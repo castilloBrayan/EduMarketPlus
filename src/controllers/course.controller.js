@@ -178,3 +178,57 @@ export const getCourseDetails = async (req, res) => {
         })
     }
 }
+
+/**
+ * Endpoint para obtener el listado de cursos comprados por el usuario
+ * GET /api/courses/my (Protegida)
+ */
+export const getMyCourses = async (req, res) => {
+    // Obtener el ID del usuario logueado
+    const userId = req.user.id
+    
+    try {
+        // Consulta para obtener todos los cursos asociados a órdenes 'COMPLETADA' del usuario
+        const myCoursesQuery = `
+            SELECT
+                c.id,
+                c.titulo,
+                c.descripcion,
+                c.precio,
+                c.clasificacion,
+                c.imagen_url,
+                c.video_url,
+                u.nombre AS instructor_nombre,
+                u.foto_url AS instructor_foto_url,
+                o.fecha_compra
+            FROM detalles_orden do
+            JOIN ordenes o ON do.orden_id = o.id
+            JOIN cursos c ON do.curso_id = c.id
+            JOIN usuarios u ON c.instructor_id = u.id
+            WHERE o.usuario_id = ? AND o.estado = 'COMPLETADA'
+            -- Agrupar por curso ID para evitar duplicados si un curso se compró en distintas órdenes
+            GROUP BY c.id 
+            ORDER BY o.fecha_compra DESC
+        `
+        const [courses] = await pool.execute(myCoursesQuery, [userId])
+
+        if (courses.length === 0) {
+            return res.status(200).json({
+                message: 'No has comprado ningún curso aún. ¡Explora nuestro catálogo!',
+                data: [],
+            })
+        }
+
+        res.status(200).json({
+            message: 'Cursos comprados recuperados exitosamente',
+            data: courses,
+            count: courses.length,
+        })
+
+    } catch (error) {
+        console.error('Error al obtener mis cursos:', error.message)
+        res.status(500).json({ 
+            error: 'Error interno del servidor al obtener mis cursos'
+        })
+    }
+}
