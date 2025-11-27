@@ -4,6 +4,77 @@ import { pool } from '../config/db.mysql.js'
 const PENDING_STATUS = 'PENDIENTE'
 
 /**
+ * Endpoint para obtener el carrito de compras (orden PENDIENTE) del usuario
+ * GET /api/cart (Protegida)
+ */
+export const getCart = async (req, res) => {
+    const userId = req.user.id
+    
+    try {
+        // Encontrar la orden 'PENDIENTE' del usuario
+        const [orderRows] = await pool.execute(
+            'SELECT id, total FROM ordenes WHERE usuario_id = ? AND estado = ?',
+            [userId, PENDING_STATUS]
+        )
+
+        const cart = orderRows[0]
+        
+        if (!cart) {
+            // Si no hay carrito, retorna un objeto vacío/null
+            return res.status(200).json({
+                message: 'El carrito está vacío',
+                data: {
+                    id: null,
+                    total: 0.00,
+                    items: []
+                }
+            })
+        }
+
+        // Obtener los detalles (items/cursos) de esa orden
+            // JOIN para obtener los datos del curso (titulo, imagen_url)
+            // junto con el precio_al_comprar y el detalle_id
+        const [itemRows] = await pool.execute(
+            `
+            SELECT 
+                do.id AS detalle_id,
+                do.curso_id,
+                do.precio_al_comprar,
+                c.titulo,
+                c.imagen_url,
+                c.clasificacion
+            FROM detalles_orden do
+            JOIN cursos c ON do.curso_id = c.id
+            WHERE do.orden_id = ?
+            `,
+            [cart.id]
+        )
+
+        // Calcular el impuesto 13% (Requerimiento)
+        const subtotal = parseFloat(cart.total)
+        const taxRate = 0.13
+        const tax = subtotal * taxRate
+        const finalTotal = subtotal + tax
+        
+        // Respuesta exitosa
+        res.status(200).json({
+            message: 'Contenido del carrito recuperado exitosamente',
+            data: {
+                id: cart.id,
+                subtotal: subtotal.toFixed(2),
+                tax: tax.toFixed(2),
+                total: finalTotal.toFixed(2), // Total con impuesto
+                items: itemRows
+            }
+        })
+
+    } catch (error) {
+        console.error('Error al obtener el carrito de compras: ', error.message)
+        res.status(500).json({ error: 'Error interno del servidor al obtener el carrito' })
+    }
+}
+
+/**
  * Endpoint para agregar un curso al carrito de compras del usuario
  * POST /api/cart/add (Protegida)
  */
