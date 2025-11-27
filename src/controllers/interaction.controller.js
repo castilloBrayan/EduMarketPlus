@@ -1,6 +1,7 @@
-import { Interaction } from '../models/interaction.model.js'
 import { pool } from '../config/db.mysql.js'
 import mongoose from 'mongoose'
+import { Interaction } from '../models/interaction.model.js'
+import { updateCourseAverageRating } from '../services/interaction.service.js'
 
 // Constante para el estado de compra 'COMPLETADA'
 const COMPLETED_STATUS = 'COMPLETADA'
