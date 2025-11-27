@@ -3,6 +3,9 @@ import { pool } from '../config/db.mysql.js'
 // Constante para el estado del carrito activo 'PENDIENTE'
 const PENDING_STATUS = 'PENDIENTE'
 
+// Constante para el estado de orden completada
+const COMPLETED_STATUS = 'COMPLETADA'
+
 /**
  * Endpoint para obtener el carrito de compras (orden PENDIENTE) del usuario
  * GET /api/cart (Protegida)
@@ -311,6 +314,86 @@ export const removeCourseFromCart = async (req, res) => {
     } finally {
         if (connection) {
             connection.release() // Liberar conexión
+        }
+    }
+}
+
+/**
+ * Endpoint para procesar el checkout (comprar) de la orden PENDIENTE del usuario
+ * POST /api/cart/checkout (Protegida)
+ */
+export const checkout = async (req, res) => {
+    const userId = req.user.id
+    
+    let connection
+    try {
+        connection = await pool.getConnection()
+        await connection.beginTransaction() // Iniciar Transacción
+
+        // Encontrar la orden PENDIENTE (el carrito) del usuario
+        const [cartRows] = await connection.execute(
+            'SELECT id, total FROM ordenes WHERE usuario_id = ? AND estado = ?',
+            [userId, PENDING_STATUS]
+        )
+
+        const cart = cartRows[0]
+
+        if (!cart) {
+            await connection.rollback()
+            return res.status(404).json({ error: 'No tienes una orden de compra pendiente (carrito vacío)' })
+        }
+        
+        const cartId = cart.id
+        const cartTotal = parseFloat(cart.total)
+
+        // Validación de Carrito Vacío (total en cero)
+        const [detailRows] = await connection.execute(
+            'SELECT COUNT(*) as count FROM detalles_orden WHERE orden_id = ?',
+            [cartId]
+        )
+
+        const courseCount = detailRows[0].count
+
+        if (courseCount === 0 || cartTotal <= 0.00) {
+            // Si el carrito está vacío, eliminarlo para limpiar la DB
+            await connection.execute('DELETE FROM ordenes WHERE id = ?', [cartId])
+            await connection.commit()
+            return res.status(400).json({ error: 'El carrito está vacío o el total es cero. No se puede procesar la compra' })
+        }
+
+        // Simulación de Pasarela de Pago
+        console.log(`Pago de $${cartTotal.toFixed(2)} para Orden #${cartId} procesado con éxito`)
+
+        // Actualizar el estado de la orden a 'COMPLETADA' y registrar la fecha de compra
+        const [updateResult] = await connection.execute(
+            'UPDATE ordenes SET estado = ?, fecha_compra = NOW() WHERE id = ? AND estado = ?',
+            [COMPLETED_STATUS, cartId, PENDING_STATUS] // Solo actualiza si aún está PENDIENTE
+        )
+
+        if (updateResult.affectedRows === 0) {
+             await connection.rollback()
+            return res.status(500).json({ error: 'Fallo al actualizar el estado de la orden. La compra no se ha completado' })
+        }
+
+        // Finalizar la transacción
+        await connection.commit() 
+
+        res.status(200).json({
+            message: '¡Compra procesada y completada exitosamente! Tus cursos están listos',
+            orderId: cartId,
+            total: cartTotal.toFixed(2),
+            newStatus: COMPLETED_STATUS
+        })
+
+    } catch (error) {
+        if (connection) {
+            await connection.rollback() // Deshacer si algo falla
+        }
+        console.error('Error durante el proceso de checkout: ', error.message)
+        res.status(500).json({ error: 'Error interno del servidor al procesar la compra' })
+    } finally {
+        if (connection) {
+            connection.release() // Liberar la conexión
         }
     }
 }
