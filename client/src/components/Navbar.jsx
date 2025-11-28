@@ -1,11 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
+import { useCart } from '../context/cart.hooks'
+import { FaShoppingCart } from 'react-icons/fa'
+
 import styles from './Navbar.module.css'
 
 const Navbar = () => {
     // Obtener el estado del usuario logueado y la función para desloguear
     const { user, logout } = useAuth()
+    const { cartItems, toggleSidebar, loading } = useCart() // Usar estado del carrito
     
     const handleLogout = async () => {
         try {
@@ -15,7 +19,6 @@ const Navbar = () => {
             })
 
             // Limpiar el estado local de la sesión
-
             logout()
             
             // La redirección a la raíz sucede automáticamente si el estado de isLoggedIn cambia
@@ -42,7 +45,18 @@ const Navbar = () => {
 
                 {/* Sección de Autenticación Condicional */}
                 {user.isLoggedIn ? (
-                    // Vista Logueada: Nombre, Foto y Logout
+                    <>
+                    // Vista Logueada: Carrito (si lo hay), Nombre, Foto y Logout
+
+                    {/* Botón del Carrito (Visible solo si hay items y el usuario está logueado) */}
+                    {(user.rol === 'Estudiante' && !loading && cartItems.length > 0) && (
+                        <button className={styles.cartButton} onClick={toggleSidebar} title="Ver Carrito">
+                            <FaShoppingCart />
+                            {/* Conteo de items */}
+                            <span className={styles.cartBadge}>{cartItems.length}</span> 
+                        </button>
+                    )}
+                    
                     <div className={styles.userInfo}>
                         <img 
                             src={user.foto_url}
@@ -55,6 +69,8 @@ const Navbar = () => {
                             Cerrar Sesión
                         </button>
                     </div>
+                    </>
+
                 ) : (
                     // Vista No Logueada: Login y Registro
                     <>
