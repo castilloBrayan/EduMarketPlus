@@ -19,8 +19,8 @@ export const CartProvider = ({ children }) => {
         }
 
         try {
-            // TODO: Implementar endpoint GET /api/cart/active
-            const response = await fetch('/api/cart/active') 
+            // Implementar endpoint GET /api/cart/
+            const response = await fetch('/api/cart/') 
             const result = await response.json()
 
             if (response.ok) {

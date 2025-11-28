@@ -46,7 +46,7 @@ const Navbar = () => {
                 {/* Sección de Autenticación Condicional */}
                 {user.isLoggedIn ? (
                     <>
-                    // Vista Logueada: Carrito (si lo hay), Nombre, Foto y Logout
+                    {/* Vista Logueada: Carrito (si lo hay), Nombre, Foto y Logout */}
 
                     {/* Botón del Carrito (Visible solo si hay items y el usuario está logueado) */}
                     {(user.rol === 'Estudiante' && !loading && cartItems.length > 0) && (

@@ -1,6 +1,5 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Navbar from './components/Navbar'
 
 import './App.css'  
 
@@ -13,8 +12,8 @@ import RegisterPage from './pages/RegisterPage'
 import CourseDetailPage from './pages/CourseDetailPage'
 import CreateCoursePage from './pages/CreateCoursePage'
 import NotFoundPage from './pages/NotFoundPage'
-// TODO: import Navbar from './components/Navbar'
-
+import Navbar from './components/Navbar'
+import CheckoutPage from './pages/CheckoutPage'
 
 function App() {
 
@@ -31,6 +30,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/courses/:id" element={<CourseDetailPage />} />
+
+          <Route 
+             path="/checkout" 
+             element={
+               <ProtectedRoute allowedRoles={['Estudiante', 'Admin', 'Instructor', 'Asistencia']}>
+                   <CheckoutPage />
+               </ProtectedRoute>
+             } 
+          />
 
           {/* Ruta Protegida (S1-FE-013) */}
           <Route 
