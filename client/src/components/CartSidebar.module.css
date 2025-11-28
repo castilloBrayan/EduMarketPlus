@@ -1,0 +1,164 @@
+/* Backdrop (Fondo Oscuro/Desenfoque) */
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Efecto de Desenfoque (para navegadores compatibles) */
+    backdrop-filter: blur(5px); 
+    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente */
+    z-index: 999; /* Asegura que esté por encima de todo menos del sidebar */
+}
+
+/* Sidebar Contenedor */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 50vw; /* Ocupa la mitad de la pantalla (50vw) */
+    max-width: 450px; /* Limita el tamaño en pantallas grandes */
+    height: 100%;
+    background-color: var(--surface-color); /* Color de fondo claro */
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* Siempre encima del backdrop */
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+
+    /* Transición para la animación de deslizamiento */
+    transition: transform 0.3s ease-out;
+}
+
+.closed {
+    /* Mueve el sidebar completamente fuera de la pantalla a la derecha */
+    transform: translateX(100%);
+}
+
+.open {
+    /* Mueve el sidebar a su posición original (visible) */
+    transform: translateX(0);
+}
+
+/* Contenido del Sidebar */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.itemsList {
+    flex-grow: 1; /* Permite que la lista de items ocupe el espacio restante */
+    overflow-y: auto; /* Scroll si hay muchos items */
+    padding-right: 0.5rem;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.itemImage {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.itemInfo {
+    flex-grow: 1;
+}
+
+.itemTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.itemPrice {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.removeItemButton {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.removeItemButton:hover {
+    opacity: 1;
+}
+
+/* Footer (Total y Botones) */
+.footer {
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.totalSummary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.totalPrice {
+    color: var(--primary-color);
+}
+
+.checkoutButton {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: var(--primary-color);
+    color: var(--surface-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.checkoutButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.continueShopping {
+    display: block;
+    text-align: center;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.continueShopping:hover {
+    text-decoration: underline;
+}
+
+.emptyMessage {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-color-secondary);
+}

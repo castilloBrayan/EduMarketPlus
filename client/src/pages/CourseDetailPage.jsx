@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-// import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
+import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
 import styles from './CourseDetailPage.module.css'
 import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
@@ -8,10 +8,57 @@ import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-ico
 const CourseDetailPage = () => {
     // Obtener el ID del curso de la URL
     const { id } = useParams()
+    const { user } = useAuth() // Obtener el estado del usuario
     
     const [course, setCourse] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    const [cartActionStatus, setCartActionStatus] = useState({
+        loading: false, 
+        error: null, 
+        success: null
+    })
+
+    // Lógica para agregar al carrito (S2-CART-025)
+    const handleAddToCart = async () => {
+        // Verificar si el usuario está logueado
+        if (!user.isLoggedIn) {
+            alert("Debes iniciar sesión para agregar cursos al carrito")
+            return
+        }
+
+        setCartActionStatus({ loading: true, error: null, success: null })
+
+        try {
+            // Llamada al endpoint para agregar al carrito
+            const response = await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ curso_id: id }), // Enviar ID del curso
+            })
+            
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Fallo al agregar el curso al carrito')
+            }
+
+            setCartActionStatus({ 
+                loading: false, 
+                error: null, 
+                success: result.message || 'Curso agregado con éxito!' 
+            })
+
+            // TODO: Actualizar icono del carrito al agregar
+            
+        } catch (err) {
+            console.error('Error al agregar al carrito: ', err)
+            setCartActionStatus({ loading: false, error: err.message, success: null })
+        }
+    }
 
     useEffect(() => {
         const fetchCourseDetails = async () => {
@@ -49,8 +96,12 @@ const CourseDetailPage = () => {
         return <div className="loadingMessage">Cargando detalles del curso...</div>
     }
 
-    if (error || !course) {
-        return <div className="errorMessage">Error: {error || "Lo sentimos, el curso solicitado no está disponible"}</div>
+    if (error) {
+        return <div className="errorMessage">Error: {error}</div>
+    }
+
+    if (!course) {
+        return <div className="errorMessage">Error: {"Lo sentimos, el curso solicitado no está disponible"}</div>
     }
 
     // Desestructuración de los datos del curso
@@ -69,51 +120,9 @@ const CourseDetailPage = () => {
         currency: 'USD'
     }).format(precio)
 
-    // return (
-    //     <div className={styles.detailContainer}>
-    //         <div className={styles.mainContent}>
-
-    //             <h1 className={styles.title}>{titulo}</h1>
-
-    //             <p className={styles.subtitle}>{titulo}, domina el nivel {clasificacion} con este curso</p>
-            
-    //             <img 
-    //                 src={imagen_url || 'placeholder_detail_url'}
-    //                 alt={`Imagen principal de ${titulo}`}
-    //                 className={styles.courseImage}
-    //             />
-
-    //             
-
-    //             {/* Sección de Descripción */}
-    //             <h2 className={styles.sectionTitle}>Descripción del Curso</h2>
-    //             <p className={styles.descriptionText}>{descripcion}</p>
-    //             <p className={styles.descriptionText}>Impartido por: <strong>{instructor_nombre}</strong></p>
-
-
-    //             {/* --- Panel Lateral de Compra --- */}
-    //             <div className={styles.sidebar}>
-    //                 <div className={styles.purchaseCard}>
-    //                     <p className={styles.price}>{formattedPrice}</p>
-                        
-    //                     <button className={styles.buyButton}>Añadir al Carrito</button>
-                        
-    //                     <div className={styles.instructorInfo}>
-    //                         <p>Impartido por:</p>
-    //                         <p><strong>{instructor_nombre}</strong></p>
-    //                         <p>Nivel: <strong>{clasificacion}</strong></p>
-    //                     </div>
-    //                 </div>
-    //             </div>
-
-    //             <Link to="/" className="back-link">Volver al Catálogo</Link>
-    //         </div>
-    //     </div>
-    // )
-
     return (
         <div className={styles.heroBackground}> {/* Contenedor general */}
-        <h1 className={styles.title}>{titulo}</h1>
+            <h1 className={styles.title}>{titulo}</h1>
 
             <div className={`content-wrap ${styles.detailContainer}`}>
                 
@@ -164,13 +173,29 @@ const CourseDetailPage = () => {
 
                 {/* Columna Derecha */}
                 <div className={styles.rightColumn}>
+
                     {/* Botón de Compra */}
                     <div className={styles.purchaseCard}>
-                        <button className={styles.buyButton}>
+                        {cartActionStatus.success && (
+                            <div className={styles.successMessage}>{cartActionStatus.success}</div>
+                        )}
+                        {cartActionStatus.error && (
+                            <div className={styles.errorMessage}>{cartActionStatus.error}</div>
+                        )}
+                        <button 
+                            className={styles.buyButton} 
+                            onClick={handleAddToCart}
+                            disabled={cartActionStatus.loading} // Desactivar si está cargando
+                        >
                             <FaShoppingCart className={styles.buyButtonIcon} />
-                            <span>Comprarlo por {formattedPrice}</span>
+                            <span>
+                                {cartActionStatus.loading 
+                                    ? 'Añadiendo...' 
+                                    : `Cómpralo por ${formattedPrice}`
+                                }
+                            </span>
                         </button>
-                        Obten acceso de por vida solo a este curso
+                        <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
                     </div>
                 </div>
             </div>
