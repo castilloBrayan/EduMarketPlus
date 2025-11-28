@@ -126,3 +126,49 @@ a:hover {
         display: none;
     }
 }
+
+.cartButton {
+    /* Contenedor del icono de carrito y el badge */
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text-color);
+    font-size: 1.5rem; /* Ajustar el tamaño del icono de carrito */
+    transition: color 0.2s ease, transform 0.1s ease;
+    display: inline-flex; /* Asegura el correcto posicionamiento del badge */
+    align-items: center;
+    justify-content: center;
+}
+
+.cartButton:hover {
+    color: var(--primary-color);
+    transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+}
+
+.cartBadge {
+    /* El contador de cursos en el carrito */
+    position: absolute;
+    top: 0;
+    right: 0;
+    /* Ajuste para colocarlo justo en la esquina superior derecha del botón */
+    transform: translate(30%, -30%); 
+    
+    min-width: 18px; 
+    height: 18px;
+    
+    background-color: var(--accent-color); /* Color de acento para que resalte */
+    color: var(--surface-color); /* Texto blanco o de contraste */
+    
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    font-size: 0.7rem;
+    font-weight: bold;
+    line-height: 1; /* Alineación vertical del número */
+    padding: 1px;
+    border: 2px solid var(--surface-color-secondary, white);
+}

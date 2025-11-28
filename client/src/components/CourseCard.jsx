@@ -49,7 +49,7 @@ const CourseCard = ({ course }) => {
                             <span className={styles.price}>{formattedPrice}</span>
                         </div> */}
 
-                        <button className={styles.detailsButton}>Agregar al carrito</button>
+                        <button className={styles.detailsButton}>Ver Detalles</button>
                     </div>
                 </div>
             </Link>
