@@ -9,9 +9,9 @@ async function setupOrderModel() {
         CREATE TABLE IF NOT EXISTS ordenes (
             id INT AUTO_INCREMENT PRIMARY KEY,
             usuario_id INT NOT NULL,
-            fecha_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
+            fecha_compra DATETIME DEFAULT NULL, -- La fecha de compra es NULL para órdenes PENDIENTES
             total DECIMAL(10, 2) NOT NULL,
-            estado VARCHAR(50) DEFAULT 'Completada',
+            estado VARCHAR(50) DEFAULT 'PENDIENTE', -- El carrito activo debe ser 'PENDIENTE' por defecto
 
             -- Llave Foránea al usuario que realiza la compra
             CONSTRAINT fk_orden_usuario
