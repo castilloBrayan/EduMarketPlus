@@ -1,5 +1,5 @@
 import { pool } from '../config/db.mysql.js'
-import Interaction from '../models/interaction.model.js'
+import { Interaction } from '../models/interaction.model.js'
 
 /**
  * Lógica para Calcular y Actualizar el Rating Promedio de un Curso (S2-INTERACT2-030)
