@@ -2,6 +2,8 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks'
 
+import styles from './CreateCoursePage.module.css'
+
 const CreateCoursePage = () => {
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -66,6 +68,17 @@ const CreateCoursePage = () => {
                 // Éxito, guardar los metadatos
                 setVideoMetadata(result.data)
                 setVideoValidationError('') // Limpiar errores si había
+
+                // Lógica para rellenar Título, Descripción e Imagen URL
+                setFormData(prev => ({
+                    ...prev,
+                    // Si el dato de YouTube existe, lo usa
+                        // sino mantiene el valor actual de formData
+                    titulo: result.data.title || prev.titulo, 
+                    descripcion: result.data.description || prev.descripcion,
+                    imagen_url: result.data.thumbnail || prev.imagen_url, 
+                }))
+
             } else {
                 // Error mostrar error del backend (URL inválida, video no encontrado)
                 setVideoValidationError(result.error || 'No se pudo obtener la información del video')
@@ -113,6 +126,7 @@ const CreateCoursePage = () => {
              setLoading(false)
              return
         }
+
         // Mandar instructor_id como ID del usuario logueado
         const courseData = {
             ...formData,
@@ -145,7 +159,7 @@ const CreateCoursePage = () => {
                     // y para evitar 'race conditions' al navegar
                 setTimeout(() => {
                     navigate(`/courses/${createdCourseId}`)
-                }, 4000) // Redirigir después de 4 segundos
+                }, 1000) // Redirigir después de 1 segundo
 
             } else {
                 // Error (como la validación 400 del backend)
@@ -161,115 +175,114 @@ const CreateCoursePage = () => {
     }
 
     return (
-        <div className="content-wrap">
-            <h2>Crear Nuevo Curso</h2>
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
+        <div className={styles.heroBackground}> {/* Contenedor general */}
+            <div className={`content-wrap ${styles.creationContainer}`}>
+            
+                {/* Columna Izquierda */}
+                <div className={styles.leftColumn}>
+                    <h2>Crear Nuevo Curso</h2>
+                    
+                    {error && <p className="error-message">{error}</p>}
+                    {success && <p className="success-message">{success}</p>}
 
-            <p>Rol actual: {user.rol}. Solo Instructor o Admin pueden usar este formulario</p>
+                    <form onSubmit={handleSubmit}>
 
-            <form onSubmit={handleSubmit}>
+                        {/* URL de Video (S2-DT-038) + Validacion de metadatos (S2-DT-X01) */}
+                        <div>
+                            <label htmlFor="video_url">URL de Video (YouTube):</label>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <input 
+                                    type="url" 
+                                    id="video_url" 
+                                    name="video_url" 
+                                    value={formData.video_url} 
+                                    onChange={handleChange} 
+                                    placeholder="https://www.youtube.com/watch?v=..." 
+                                    style={{ flexGrow: 1 }}
+                                    required
+                                />
+                                <button
+                                    type="button" 
+                                    onClick={handleVideoUrlValidation} 
+                                    disabled={!formData.video_url.trim() || videoValidationLoading}
+                                    style={{ padding: '0.6em 1em', whiteSpace: 'nowrap' }}
+                                >
+                                    {videoValidationLoading ? 'Validando...' : 'Validar Video'}
+                                </button>
+                            </div>
+                        
+                            {/* Feedback de validación */}
+                            {videoValidationError && 
+                                <p className="error-message">
+                                    {videoValidationError}
+                                </p>
+                            }
+                            {videoMetadata && 
+                                <p className="success-message">
+                                    <span style={{ fontWeight: 'bold' }}>Validado</span> <hr /> 
+                                    Duración: {formattedDuration} | 
+                                    Publicado: {new Date(videoMetadata.publishedDate).toLocaleDateString()}
+                                </p>
+                            }
+                        </div>
 
-                {/* Título */}        
-                <div>
-                    <label htmlFor="titulo">Título del Curso:</label>
-                    <input type="text" id="titulo" name="titulo" value={formData.titulo} onChange={handleChange} required />
-                </div>
 
-                {/* Descripción */}
-                <div>
-                    <label htmlFor="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleChange} required rows="4"></textarea>
-                </div>
+                        {/* Título */}        
+                        <div>
+                            <label htmlFor="titulo" className={styles.label}>Título del Curso:</label>
+                            <input type="text" id="titulo" name="titulo" value={formData.titulo} onChange={handleChange} required />
+                        </div>
 
-                {/* Imagen URL */}
-                <div>
-                    <label htmlFor="imagen_url">URL de la Imagen:</label>
-                    <input type="url" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleChange} required />
-                </div>
+                        {/* Descripción */}
+                        <div>
+                            <label htmlFor="descripcion">Descripción:</label>
+                            <textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleChange} required rows="3"></textarea>
+                        </div>
 
-                {/* URL de Video (S2-DT-038) + Validacion de metadatos (S2-DT-X01) */}
-                <div>
-                    <label htmlFor="video_url">URL de Video (YouTube):</label>
-                    <input 
-                        type="url" 
-                        id="video_url" 
-                        name="video_url" 
-                        value={formData.video_url} 
-                        onChange={handleChange} 
-                        placeholder="Ej: https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
-                        required
-                    />
-                </div>
+                        {/* Imagen URL */}
+                        <div>
+                            <label htmlFor="imagen_url">URL de la Imagen:</label>
+                            <input type="url" id="imagen_url" name="imagen_url" value={formData.imagen_url} onChange={handleChange} required />
+                        </div>
 
-                <div>
-                    <label htmlFor="video_url">URL de Video (YouTube):</label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                         <input 
-                            type="url" 
-                            id="video_url" 
-                            name="video_url" 
-                            value={formData.video_url} 
-                            onChange={handleChange} 
-                            placeholder="https://www.youtube.com/watch?v=..." 
-                            style={{ flexGrow: 1 }}
-                            required
-                        />
-                        <button
-                            type="button" 
-                            onClick={handleVideoUrlValidation} 
-                            disabled={!formData.video_url.trim() || videoValidationLoading}
-                            style={{ padding: '0.6em 1em', whiteSpace: 'nowrap' }}
+                        {/* Precio */}
+                        <div>
+                            <label htmlFor="precio">Precio (USD):</label>
+                            <input type="number" id="precio" name="precio" value={formData.precio} onChange={handleChange} min="0" required />
+                        </div>
+
+                        {/* Categoría */}
+                        {/* TODO: Debe ser una lista de categorias (tags) */}
+                        <div>
+                            <label htmlFor="categoria">Categoría Principal:</label>
+                            <input type="text" id="categoria" name="categoria" value={formData.categoria} onChange={handleChange} placeholder="Ej: Programación, Diseño" required />
+                        </div>
+
+                        {/* Clasificación */}
+                        <div>
+                            <label htmlFor="clasificacion">Clasificación:</label>
+                            <select id="clasificacion" name="clasificacion" value={formData.clasificacion} onChange={handleChange}>
+                                <option value="Basico">Básico</option>
+                                <option value="Intermedio">Intermedio</option>
+                                <option value="Avanzado">Avanzado</option>
+                            </select>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={loading || videoValidationLoading} // Deshabilitar si se está validando el video
                         >
-                            {videoValidationLoading ? 'Validando...' : 'Validar Video'}
+                            {loading ? 'Creando...' : 'Publicar Curso'}
                         </button>
-                    </div>
-                   
-                    {/* Feedback de validación */}
-                    {videoValidationError && 
-                        <p style={{ color: 'red', fontSize: '0.9em', marginTop: '0.5rem' }}>
-                            {videoValidationError}
-                        </p>
-                    }
-                    {videoMetadata && 
-                        <p style={{ color: 'blue', fontSize: '0.9em', marginTop: '0.5rem' }}>
-                            <span style={{ fontWeight: 'bold' }}>Validado: </span>
-                            Duración: {formattedDuration} | 
-                            Publicado: {new Date(videoMetadata.publishedDate).toLocaleDateString()}
-                        </p>
-                    }
+                    </form>
                 </div>
+                
+                {/* Columna Derecha */}
+                <div className={styles.rightColumn}>
+                    <h2>Vista previa</h2>
 
-                {/* Precio */}
-                <div>
-                    <label htmlFor="precio">Precio (USD):</label>
-                    <input type="number" id="precio" name="precio" value={formData.precio} onChange={handleChange} min="0" step="0.01" required />
                 </div>
-
-                {/* Categoría */}
-                {/* TODO: Debe ser una lista de categorias (tags) */}
-                <div>
-                    <label htmlFor="categoria">Categoría Principal:</label>
-                    <input type="text" id="categoria" name="categoria" value={formData.categoria} onChange={handleChange} placeholder="Ej: Programación, Diseño" required />
-                </div>
-
-                {/* Clasificación */}
-                <div>
-                    <label htmlFor="clasificacion">Clasificación:</label>
-                    <select id="clasificacion" name="clasificacion" value={formData.clasificacion} onChange={handleChange}>
-                        <option value="Basico">Básico</option>
-                        <option value="Intermedio">Intermedio</option>
-                        <option value="Avanzado">Avanzado</option>
-                    </select>
-                </div>
-
-                <button 
-                    type="submit" 
-                    disabled={loading || videoValidationLoading} // Deshabilitar si se está validando el video
-                >
-                    {loading ? 'Creando...' : 'Publicar Curso'}
-                </button>
-            </form>
+            </div>
         </div>
     )
 }
