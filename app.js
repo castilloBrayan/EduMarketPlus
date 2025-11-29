@@ -11,7 +11,7 @@ import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
 import { setupUserModel } from './src/models/user.model.js'
 import { setupCourseModel } from './src/models/course.model.js'
-import { setupOrderAndDetailModels } from './src/models/order.model.js'
+import { setupOrderModel, setupOrderDetailModel } from './src/models/order.model.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -41,7 +41,8 @@ await setupUserModel()
 await setupCourseModel()
 
 // Ejecutar la creación de las tablas de órdenes y detalles (S2-DB-022)
-await setupOrderAndDetailModels()
+await setupOrderModel()
+await setupOrderDetailModel()
 
 // Establecer la conexión a MongoDB
 connectMongoDB()
