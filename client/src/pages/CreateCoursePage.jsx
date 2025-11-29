@@ -68,6 +68,17 @@ const CreateCoursePage = () => {
                 // Éxito, guardar los metadatos
                 setVideoMetadata(result.data)
                 setVideoValidationError('') // Limpiar errores si había
+
+                // Lógica para rellenar Título, Descripción e Imagen URL
+                setFormData(prev => ({
+                    ...prev,
+                    // Si el dato de YouTube existe, lo usa
+                        // sino mantiene el valor actual de formData
+                    titulo: result.data.title || prev.titulo, 
+                    descripcion: result.data.description || prev.descripcion,
+                    imagen_url: result.data.thumbnail || prev.imagen_url, 
+                }))
+
             } else {
                 // Error mostrar error del backend (URL inválida, video no encontrado)
                 setVideoValidationError(result.error || 'No se pudo obtener la información del video')
@@ -115,6 +126,7 @@ const CreateCoursePage = () => {
              setLoading(false)
              return
         }
+
         // Mandar instructor_id como ID del usuario logueado
         const courseData = {
             ...formData,
@@ -224,7 +236,7 @@ const CreateCoursePage = () => {
                         {/* Descripción */}
                         <div>
                             <label htmlFor="descripcion">Descripción:</label>
-                            <textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleChange} required rows="4"></textarea>
+                            <textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleChange} required rows="3"></textarea>
                         </div>
 
                         {/* Imagen URL */}
