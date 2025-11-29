@@ -145,7 +145,7 @@ const CreateCoursePage = () => {
                     // y para evitar 'race conditions' al navegar
                 setTimeout(() => {
                     navigate(`/courses/${createdCourseId}`)
-                }, 4000) // Redirigir después de 4 segundos
+                }, 1000) // Redirigir después de 1 segundo
 
             } else {
                 // Error (como la validación 400 del backend)
