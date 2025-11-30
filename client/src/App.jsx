@@ -14,6 +14,7 @@ import CreateCoursePage from './pages/CreateCoursePage'
 import NotFoundPage from './pages/NotFoundPage'
 import Navbar from './components/Navbar'
 import CheckoutPage from './pages/CheckoutPage'
+import CartSidebar from './components/CartSidebar'
 
 function App() {
 
@@ -55,6 +56,8 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
+
+      <CartSidebar />
     </Router>
   )
 }

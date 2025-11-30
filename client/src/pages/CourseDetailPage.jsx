@@ -5,10 +5,13 @@ import { useAuth } from '../context/auth.hooks' // Se usara para el boton de com
 import styles from './CourseDetailPage.module.css'
 import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
 
+import { useCart } from '../context/cart.hooks'
+
 const CourseDetailPage = () => {
     // Obtener el ID del curso de la URL
     const { id } = useParams()
     const { user } = useAuth() // Obtener el estado del usuario
+    const { fetchCart, toggleSidebar } = useCart() // Obtener contexto del carrito
     
     const [course, setCourse] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -51,6 +54,9 @@ const CourseDetailPage = () => {
                 error: null, 
                 success: result.message || 'Curso agregado con éxito!' 
             })
+
+            fetchCart() // Recargar los datos del carrito
+            toggleSidebar() // Abrir sidebar
 
             // TODO: Actualizar icono del carrito al agregar
             

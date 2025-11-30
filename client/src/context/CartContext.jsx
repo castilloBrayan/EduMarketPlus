@@ -6,6 +6,7 @@ export const CartProvider = ({ children }) => {
     const { user } = useAuth()
     
     // Estado del carrito: array de cursos y el total
+    const [cartContent, setCartContent] = useState([])
     const [cartItems, setCartItems] = useState([])
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -24,7 +25,9 @@ export const CartProvider = ({ children }) => {
             const result = await response.json()
 
             if (response.ok) {
-                // Asumimos que el backend devuelve un array de 'items' (detalles_orden con info del curso)
+                // Data: backend devuelve un array de 'data' (contenido del carrito, incluyendo items)
+                setCartContent(result.data || []) 
+                // Items: backend devuelve un array de 'items' (detalles_orden con info del curso)
                 setCartItems(result.data.items || []) 
             } else {
                 setCartItems([])
@@ -42,8 +45,10 @@ export const CartProvider = ({ children }) => {
         setIsSidebarOpen(prev => !prev)
     }
 
-    // Calcular el total
-    const cartTotal = cartItems.reduce((acc, item) => acc + item.precio_al_comprar, 0)
+    // Tomar el total del CartContent 
+    const cartTotal = cartContent.total || 0
+    const cartSubTotal = cartContent.subtotal || 0
+    const cartTax = cartContent.tax || 0
 
     // Cargar el carrito al iniciar sesión
     useEffect(() => {
@@ -54,6 +59,8 @@ export const CartProvider = ({ children }) => {
     const contextValue = {
         cartItems,
         cartTotal,
+        cartSubTotal,
+        cartTax,
         isSidebarOpen,
         loading,
         fetchCart, // Para recargar el carrito después de agregar/eliminar
