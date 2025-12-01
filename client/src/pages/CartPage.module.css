@@ -36,12 +36,6 @@
     margin-right: auto;
 }
 
-.sumaryContainer h4 {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-}
-
 .purchaseCard {
     flex: 1;
     display: flex;
@@ -72,12 +66,11 @@
 .itemsList {
     flex-grow: 1; /* Permite que la lista de items ocupe el espacio restante */
     overflow-y: auto; /* Scroll si hay muchos items */
-    padding-right: 0.5rem;
 }
 
 .item {
-    display: flex;
     align-items: center;
+    display: flex;
     gap: 1rem;
     padding: 0.75rem 0;
     border-bottom: 1px dashed var(--border-color);
@@ -91,11 +84,14 @@
 }
 
 .itemInfo {
+    text-align: left;
+    align-items: start;
     flex-grow: 1;
 }
 
 .itemTitle {
     margin: 0;
+    padding: 12px;
     font-size: 0.95rem;
     color: var(--text-color);
     font-weight: 500;
@@ -103,8 +99,8 @@
 
 .itemPrice {
     font-weight: bold;
-    color: var(--primary-color);
-    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    font-size: 1.5rem;
 }
 
 .customDivider {
@@ -116,8 +112,27 @@
     opacity: 0.5;
 }
 
+.removeItemButton {
+    background: none;
+    border: none;
+    color: #ff3045;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.removeItemButton:hover {
+    opacity: 0.8;
+}
+.removeItemButton:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0);
+    transform: translateY(-1px);
+}
+
 .message {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
     margin-bottom: 2rem;
     color: var(--text-color);
 }
@@ -154,7 +169,8 @@
 }
 
 .goToCoursesButton {
-    color: var(--text-color);
+    background-color: var(--accent-color);
+    color: var(--surface-color);
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 6px;
@@ -163,6 +179,10 @@
     font-weight: bold;
     transition: background-color 0.3s;
     width: 100%;
+}
+
+.goToCoursesButton:hover {
+    background-color: #1e7e34;
 }
 
 /* Responsividad */
