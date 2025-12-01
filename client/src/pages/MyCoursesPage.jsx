@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/auth.hooks'
 
 import styles from './MyCoursesPage.module.css' 
@@ -12,7 +12,7 @@ const MyCoursesPage = () => {
     const [error, setError] = useState(null)
 
     // Función para obtener los cursos comprados
-    const fetchMyCourses = async () => {
+    const fetchMyCourses = useCallback(async () => {
         if (!user.isLoggedIn) return
 
         setLoading(true)
@@ -36,11 +36,11 @@ const MyCoursesPage = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [user.isLoggedIn])
 
     useEffect(() => {
         fetchMyCourses()
-    }, [user.isLoggedIn])
+    }, [fetchMyCourses]) // La dependencia es fetchMyCourses
 
     if (loading) {
         return <div className={styles.loadingContainer}>Cargando tus cursos...</div>
