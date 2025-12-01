@@ -57,6 +57,11 @@ const Navbar = () => {
                             <span className={styles.cartBadge}>{cartItems.length}</span> 
                         </button>
                     )}
+
+                    {/* Botón de Mis Cursos (Visible solo si el usuario está logueado como estudiante) */}
+                    {(user.rol === 'Estudiante' && !loading) && (
+                        <Link to="/my-courses" className={styles.navItem}>Mis Cursos</Link>
+                    )}
                     
                     <div className={styles.userInfo}>
                         <img 

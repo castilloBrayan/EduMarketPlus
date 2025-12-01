@@ -16,6 +16,7 @@ import Navbar from './components/Navbar'
 import CheckoutPage from './pages/CheckoutPage'
 import CartSidebar from './components/CartSidebar'
 import CartPage from './pages/CartPage'
+import MyCoursesPage from './pages/MyCoursesPage'
 
 function App() {
 
@@ -47,6 +48,16 @@ function App() {
              element={
                <ProtectedRoute allowedRoles={['Estudiante']}>
                    <CheckoutPage />
+               </ProtectedRoute>
+             } 
+          />
+
+          {/* RUTA PARA MIS CURSOS (S2-FE-034) */}
+          <Route 
+             path="/my-courses" 
+             element={
+               <ProtectedRoute allowedRoles={['Estudiante']}>
+                   <MyCoursesPage />
                </ProtectedRoute>
              } 
           />
