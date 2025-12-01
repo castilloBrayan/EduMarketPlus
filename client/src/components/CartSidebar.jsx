@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../context/cart.hooks'
 import { FaTimes, FaShoppingBag, FaTrashAlt } from 'react-icons/fa'
 
@@ -11,6 +11,8 @@ const CartSidebar = () => {
         toggleSidebar, 
         cartItems, 
         cartTotal, 
+        cartSubTotal,
+        cartTax,
         fetchCart 
     } = useCart()
     const navigate = useNavigate()
@@ -57,7 +59,7 @@ const CartSidebar = () => {
             {/* Contenedor principal del Sidebar */}
             <div className={`${styles.sidebar} ${isSidebarOpen ? styles.open : styles.closed}`}>
                 <div className={styles.header}>
-                    <h2><FaShoppingBag />Tu carrito({cartItems.length})</h2>
+                    <h2><FaShoppingBag /> Tu carrito({cartItems.length})</h2>
                     <button onClick={toggleSidebar} className={styles.closeButton}>
                         <FaTimes />
                     </button>
@@ -88,6 +90,8 @@ const CartSidebar = () => {
                 <div className={styles.footer}>
                     <div className={styles.totalSummary}>
                         <span>Total ({cartItems.length}) cursos:</span>
+                        <span className={styles.totalPrice}>{formatPrice(cartSubTotal)}</span>
+                        <span className={styles.totalPrice}>{formatPrice(cartTax)}</span>
                         <span className={styles.totalPrice}>{formatPrice(cartTotal)}</span>
                     </div>
                     <button 
@@ -97,7 +101,7 @@ const CartSidebar = () => {
                     >
                         Proceder al Checkout
                     </button>
-                    <Link to="/catalogo" className={styles.continueShopping}>
+                    <Link to="/" className={styles.continueShopping} onClick={toggleSidebar}>
                         Continuar Comprando
                     </Link>
                 </div>

@@ -5,6 +5,7 @@ import { useCart } from '../context/cart.hooks'
 import { FaShoppingCart } from 'react-icons/fa'
 
 import styles from './Navbar.module.css'
+const DEFAULT_AVATAR = '/default-avatar.png' 
 
 const Navbar = () => {
     // Obtener el estado del usuario logueado y la función para desloguear
@@ -48,7 +49,7 @@ const Navbar = () => {
                     <>
                     {/* Vista Logueada: Carrito (si lo hay), Nombre, Foto y Logout */}
 
-                    {/* Botón del Carrito (Visible solo si hay items y el usuario está logueado) */}
+                    {/* Botón del Carrito (Visible solo si hay items y el usuario está logueado como estudiante) */}
                     {(user.rol === 'Estudiante' && !loading && cartItems.length > 0) && (
                         <button className={styles.cartButton} onClick={toggleSidebar} title="Ver Carrito">
                             <FaShoppingCart />
@@ -59,8 +60,8 @@ const Navbar = () => {
                     
                     <div className={styles.userInfo}>
                         <img 
-                            src={user.foto_url}
-                            alt={user.nombre}
+                            src={user.foto_url || DEFAULT_AVATAR}
+                            alt={user.nombre || 'Usuario'}
                             className={styles.userAvatar}
                         />
                         

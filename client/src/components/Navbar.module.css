@@ -98,13 +98,17 @@ a:hover {
 
 .logoutButton {
     background-color: var(--error-color);
-    color: var(--surface-color);
-    padding: 0.4rem 0.8rem;
+    color: var(--text-color);
     font-size: 0.9rem;
-    border-radius: 20px;
+    font-size: 1rem;
+    padding: 0.5rem 0.25rem;
+    transition: color 0.2s;
+    border-radius: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
-.logoutButton:hover {
-    background-color: rgba(179, 17, 39, 0.781);
+.logoutButton:hover:not(:disabled) {
+    background-color: rgb(196, 17, 41);
 }
 
 /* --- Media Queries --- */
@@ -142,9 +146,14 @@ a:hover {
     justify-content: center;
 }
 
-.cartButton:hover {
-    color: var(--primary-color);
-    transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+.cartButton:hover:not(:disabled) {
+    background-color: rgba(179, 179, 179, 0.199);
+    transform: translateY(-2px);
+}
+
+.cartButton:focus,
+.cartButton:focus-visible {
+  outline: none;
 }
 
 .cartBadge {
@@ -158,8 +167,8 @@ a:hover {
     min-width: 18px; 
     height: 18px;
     
-    background-color: var(--accent-color); /* Color de acento para que resalte */
-    color: var(--surface-color); /* Texto blanco o de contraste */
+    background-color: #35A9FD; /* Color de acento para que resalte */
+    color: var(--text-color); /* Texto blanco de contraste */
     
     border-radius: 50%;
     display: flex;
