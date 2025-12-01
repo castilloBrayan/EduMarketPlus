@@ -35,7 +35,7 @@ function App() {
           <Route 
              path="/checkout" 
              element={
-               <ProtectedRoute allowedRoles={['Estudiante', 'Admin', 'Instructor', 'Asistencia']}>
+               <ProtectedRoute allowedRoles={['Estudiante']}>
                    <CheckoutPage />
                </ProtectedRoute>
              } 
