@@ -101,7 +101,7 @@ export const loginUser = async (req, res) => {
     try {
         // Buscar al usuario por correo
         const [users] = await pool.execute(
-            'SELECT id, rol, contraseña_hash, nombre FROM usuarios WHERE correo = ?', 
+            'SELECT id, rol, contraseña_hash, nombre, foto_url FROM usuarios WHERE correo = ?', 
             [correo]
         )
 
@@ -145,7 +145,7 @@ export const loginUser = async (req, res) => {
         // Respuesta exitosa
         res.status(200).json({
             message: 'Inicio de sesión exitoso',
-            user: { id: user.id, nombre: user.nombre, rol: user.rol }
+            user: { id: user.id, nombre: user.nombre, rol: user.rol, foto_url: user.foto_url }
         })
 
     } catch (error) {
