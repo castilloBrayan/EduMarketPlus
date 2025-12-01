@@ -3,9 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
 import styles from './CourseDetailPage.module.css'
-import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
+import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar  } from 'react-icons/fa'
 
 import InteractionForm from '../components/InteractionForm.jsx' 
+import InteractionList from '../components/InteractionList.jsx'
 
 import { useCart } from '../context/cart.hooks'
 
@@ -21,6 +22,12 @@ const CourseDetailPage = () => {
 
     // Estado para mantener las interacciones (Comentarios y Ratings)
     const [interactions] = useState([])
+    
+    // Estado para la recarga de reviews
+    const [refreshReviews, setRefreshReviews] = useState(0)
+    
+    // Estado para el rating promedio
+    const [courseRating, setCourseRating] = useState({ average: 'N/A', count: 0 })
 
     const [cartActionStatus, setCartActionStatus] = useState({
         loading: false, 
@@ -72,14 +79,14 @@ const CourseDetailPage = () => {
     }
 
     // Función para manejar la publicación exitosa de un comentario
-    const handleReviewSubmitted = (newReview) => {
-        // Esta función se llama después de que el usuario publica una review exitosamente
-        console.log("Comentario publicado exitosamente:", newReview)
-        
-        // TODO: Recargar todas las interacciones (S2-FE-036)
-        // fetchInteractions(id) 
+    const handleReviewSubmitted = () => {
+        // Incrementar el estado para forzar la recarga de la lista de reviews
+        setRefreshReviews(prev => prev + 1)
+    }
 
-        alert("¡Gracias por tu comentario! Se ha registrado tu valoración.")
+    // Funcion para obtener el promedio del componente hijo
+    const handleReviewsLoaded = (ratingData) => {
+        setCourseRating(ratingData);
     }
 
     useEffect(() => {
@@ -141,6 +148,9 @@ const CourseDetailPage = () => {
         style: 'currency',
         currency: 'USD'
     }).format(precio)
+
+    // Usar course.rating_promedio si viene del backend (MySQL), si no, usar el de MongoDB
+    const displayRating = course?.rating_promedio ? course.rating_promedio : courseRating.average
 
     return (
         <div className={styles.heroBackground}> {/* Contenedor general */}
@@ -226,6 +236,17 @@ const CourseDetailPage = () => {
 
                 {/* Columna Izquierda */}
                 <div className={styles.leftColumn}>
+
+                    <div className={styles.ratingInfo}>
+                        {/* Se actualiza con el dato de courseRating.average */}
+                        {displayRating !== 'N/A' && (
+                             <p className={styles.averageRating}>
+                                {displayRating}
+                                <FaStar className={styles.starIcon} /> 
+                                ({courseRating.count} opiniones)
+                            </p>
+                        )}
+                    </div>
                     
                     {/* Lista de comentarios (Implementación detallada en S2-FE-036) */}
                     <div className={styles.section}>
@@ -235,7 +256,11 @@ const CourseDetailPage = () => {
                             <p>Aún no hay comentarios. ¡Sé el primero en opinar!</p>
                         ) : (
                             <div>
-                                {/* Componente ReviewList o similar, que mapee `interactions` */}
+                                <InteractionList 
+                                    cursoId={course.id} // ID del curso para fetch
+                                    onReviewsLoaded={handleReviewsLoaded} // Callback para actualizar el rating en el padre
+                                    triggerRefresh={refreshReviews} // Para forzar la recarga
+                                />
                             </div>
                         )}
                     </div>
