@@ -72,6 +72,9 @@ export const getYoutubeMetadata = async (req, res) => {
 
         const durationISO = video.contentDetails.duration // Formato PThM0s
         const publishedAt = video.snippet.publishedAt // Fecha de publicación
+        const title = video.snippet.title
+        const description = video.snippet.description
+        const thumbnailUrl = video.snippet.thumbnails.high.url // Miniatura de alta calidad
 
         // Procesar la duración para un formato más amigable
         const durationParsed = parseDuration(durationISO)
@@ -82,6 +85,9 @@ export const getYoutubeMetadata = async (req, res) => {
             data: {
                 publishedDate: publishedAt,
                 duration: durationParsed,
+                title: title,
+                description: description,
+                thumbnail: thumbnailUrl,
             },
         })
 
