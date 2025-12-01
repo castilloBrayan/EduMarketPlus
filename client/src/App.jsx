@@ -15,6 +15,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import Navbar from './components/Navbar'
 import CheckoutPage from './pages/CheckoutPage'
 import CartSidebar from './components/CartSidebar'
+import CartPage from './pages/CartPage'
 
 function App() {
 
@@ -31,6 +32,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/courses/:id" element={<CourseDetailPage />} />
+
+          <Route 
+             path="/cart" 
+             element={
+               <ProtectedRoute allowedRoles={['Estudiante']}>
+                   <CartPage />
+               </ProtectedRoute>
+             } 
+          />
 
           <Route 
              path="/checkout" 
