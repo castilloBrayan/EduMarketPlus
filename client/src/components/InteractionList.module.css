@@ -1,0 +1,123 @@
+.reviewListContainer {
+    margin-top: 20px;
+}
+
+.averageRatingBox {
+    display: flex;
+    align-items: center;
+    background-color: #2a2a2a; /* Fondo más oscuro para el promedio */
+    padding: 15px 25px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.ratingValue {
+    font-size: 3em;
+    font-weight: 700;
+    color: #ffc107;
+    margin-right: 15px;
+}
+
+.starsWrapper {
+    display: flex;
+    gap: 3px;
+    margin-right: 15px;
+    font-size: 1.5em;
+}
+
+.starDisplay {
+    margin: 0;
+}
+
+.ratingCount {
+    color: #ccc;
+    font-size: 1em;
+}
+
+.loadingMessage, .errorMessage, .noReviews {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loadingMessage {
+    background-color: #333;
+    color: #007bff;
+}
+
+.errorMessage {
+    background-color: #58151c;
+    color: #dc3545;
+}
+
+.noReviews {
+    background-color: #333;
+    color: #aaa;
+    font-style: italic;
+}
+
+.reviewsGrid {
+    display: grid;
+    gap: 20px;
+    /* Coloca dos columnas en desktop */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+}
+
+.reviewCard {
+    background: #333;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 5px solid #007bff; /* Detalle de color */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.reviewHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.userAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+    border: 2px solid #555;
+}
+
+.userAvatarDefault {
+    width: 40px;
+    height: 40px;
+    color: #ccc;
+    margin-right: 10px;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.userName {
+    margin: 0;
+    font-size: 1.1em;
+    color: #fff;
+}
+
+.ratingStars {
+    font-size: 0.9em;
+}
+
+.reviewComment {
+    color: #ddd;
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.reviewDate {
+    display: block;
+    font-size: 0.8em;
+    color: #999;
+    text-align: right;
+}
