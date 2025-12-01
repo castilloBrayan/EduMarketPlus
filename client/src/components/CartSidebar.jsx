@@ -59,7 +59,7 @@ const CartSidebar = () => {
             {/* Contenedor principal del Sidebar */}
             <div className={`${styles.sidebar} ${isSidebarOpen ? styles.open : styles.closed}`}>
                 <div className={styles.header}>
-                    <h2><FaShoppingBag />Tu carrito({cartItems.length})</h2>
+                    <h2><FaShoppingBag /> Tu carrito({cartItems.length})</h2>
                     <button onClick={toggleSidebar} className={styles.closeButton}>
                         <FaTimes />
                     </button>
