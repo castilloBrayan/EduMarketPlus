@@ -17,7 +17,7 @@
     top: 0;
     right: 0;
     width: 50vw; /* Ocupa la mitad de la pantalla (50vw) */
-    max-width: 450px; /* Limita el tamaño en pantallas grandes */
+    max-width: 950px; /* Limita el tamaño en pantallas grandes */
     height: 100%;
     background-color: var(--surface-color); /* Color de fondo claro */
     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
