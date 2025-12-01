@@ -209,16 +209,16 @@ export const addCourseToCart = async (req, res) => {
 
 /**
  * Endpoint para eliminar un curso de un carrito de compras
- * Requiere el ID del detalle_orden (detalle_id) y el ID del usuario (de req.user)
- * DELETE /api/cart/:detalle_id (Protegida)
+ * Requiere el ID del curso (course_id) y el ID del usuario (de req.user)
+ * DELETE /api/cart/:course_id (Protegida)
  */
 export const removeCourseFromCart = async (req, res) => {
     // Obtener IDs
     const userId = req.user.id
-    const detalleId = parseInt(req.params.id) // ID del detalle de la orden a eliminar
+    const courseId = parseInt(req.params.id) // ID del courso a eliminar de la orden 
     
-    if (isNaN(detalleId) || detalleId <= 0) {
-        return res.status(400).json({ error: 'ID de detalle de orden inválido' })
+    if (isNaN(courseId) || courseId <= 0) {
+        return res.status(400).json({ error: 'ID de curso inválido' })
     }
 
     let connection
@@ -226,30 +226,37 @@ export const removeCourseFromCart = async (req, res) => {
         connection = await pool.getConnection()
         await connection.beginTransaction() // Iniciar Transacción
 
-        // Verificar que el detalle_orden pertenezca a la orden PENDIENTE del usuario
+        // Verificar que el curso pertenezca a un detalle con orden PENDIENTE del usuario
         const [detailRows] = await connection.execute(
             `
-            SELECT do.orden_id, do.precio_al_comprar
-            FROM detalles_orden do
-            JOIN ordenes o ON do.orden_id = o.id
-            WHERE do.id = ? AND o.usuario_id = ? AND o.estado = ?
+            SELECT
+                o.id AS orden_id,
+                do.id AS detalle_orden_id
+            FROM
+                ordenes o
+            INNER JOIN
+                detalles_orden do ON o.id = do.orden_id
+            WHERE
+                o.usuario_id = ? AND  -- ID del usuario
+                o.estado = ? AND -- Estado a verificar
+                do.curso_id = ?; -- ID del curso 
             `,
-            [detalleId, userId, PENDING_STATUS]
+            [userId, PENDING_STATUS, courseId]
         )
-
-        const detail = detailRows[0]
-
-        if (!detail) {
-            await connection.rollback()
-            return res.status(404).json({ error: 'Detalle de curso no encontrado en el carrito activo del usuario' })
+        
+        if (detailRows.length === 0) {
+            // Si el array está vacío, el curso no está en la orden PENDIENTE del usuario
+            await connection.rollback();
+            return res.status(404).json({ error: 'Curso no encontrado en el carrito activo del usuario' });
         }
 
-        const cartId = detail.orden_id
+        const detalleOrdenId = detailRows[0].detalle_orden_id
+        const cartId = detailRows[0].orden_id // Para actualizar el total del carrito
 
         // Eliminar el detalle de la orden (curso)
         const [deleteResult] = await connection.execute(
             'DELETE FROM detalles_orden WHERE id = ?',
-            [detalleId]
+            [detalleOrdenId]
         )
         
         if (deleteResult.affectedRows === 0) {
@@ -271,25 +278,27 @@ export const removeCourseFromCart = async (req, res) => {
         // Si no quedan detalles, el total es 0.00
         const nuevoSubtotal = totalRows[0].nuevo_subtotal || 0.00
         
-        // Actualizar la orden (Carrito)
+        // Actualizar el total de la orden (Carrito)
 
-        // Manejar el caso de Carrito Vacío
-        if (parseFloat(nuevoSubtotal) === 0.00) {
-            // Eliminar la orden PENDIENTE porque está vacía
-            await connection.execute(
-                'DELETE FROM ordenes WHERE id = ?',
-                [cartId]
-            )
+        // TODO: debo aliminar el carrito si se elimina el ultimo item de el?
+
+        // // Manejar el caso de Carrito Vacío
+        // if (parseFloat(nuevoSubtotal) === 0.00) {
+        //     // Eliminar la orden PENDIENTE porque está vacía
+        //     await connection.execute(
+        //         'DELETE FROM ordenes WHERE id = ?',
+        //         [cartId]
+        //     )
             
-            await connection.commit() // Confirmar Transacción (Eliminación de detalle y orden)
+        //     await connection.commit() // Confirmar Transacción (Eliminación de detalle y orden)
             
-            // Respuesta específica para carrito vacío
-            return res.status(200).json({
-                message: 'Curso eliminado. El carrito ahora está vacío',
-                cartId: null,
-                nuevoTotal: '0.00',
-            })
-        }
+        //     // Respuesta específica para carrito vacío
+        //     return res.status(200).json({
+        //         message: 'Curso eliminado. El carrito ahora está vacío',
+        //         cartId: null,
+        //         nuevoTotal: '0.00',
+        //     })
+        // }
 
         // Si el carrito no está vacío, solo actualizar el total
         await connection.execute(
