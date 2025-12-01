@@ -5,6 +5,8 @@ import { useAuth } from '../context/auth.hooks' // Se usara para el boton de com
 import styles from './CourseDetailPage.module.css'
 import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
 
+import InteractionForm from '../components/InteractionForm.jsx' 
+
 import { useCart } from '../context/cart.hooks'
 
 const CourseDetailPage = () => {
@@ -16,6 +18,9 @@ const CourseDetailPage = () => {
     const [course, setCourse] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    // Estado para mantener las interacciones (Comentarios y Ratings)
+    const [interactions] = useState([])
 
     const [cartActionStatus, setCartActionStatus] = useState({
         loading: false, 
@@ -64,6 +69,17 @@ const CourseDetailPage = () => {
             console.error('Error al agregar al carrito: ', err)
             setCartActionStatus({ loading: false, error: err.message, success: null })
         }
+    }
+
+    // Función para manejar la publicación exitosa de un comentario
+    const handleReviewSubmitted = (newReview) => {
+        // Esta función se llama después de que el usuario publica una review exitosamente
+        console.log("Comentario publicado exitosamente:", newReview)
+        
+        // TODO: Recargar todas las interacciones (S2-FE-036)
+        // fetchInteractions(id) 
+
+        alert("¡Gracias por tu comentario! Se ha registrado tu valoración.")
     }
 
     useEffect(() => {
@@ -203,6 +219,40 @@ const CourseDetailPage = () => {
                         </button>
                         <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
                     </div>
+                </div>
+            </div>
+
+            <div className={styles.detailContainer}>
+
+                {/* Columna Izquierda */}
+                <div className={styles.leftColumn}>
+                    
+                    {/* Lista de comentarios (Implementación detallada en S2-FE-036) */}
+                    <div className={styles.section}>
+                        <h2>Comentarios y Valoraciones</h2>
+                        {/* Aquí irá el componente para mostrar la lista de interacciones (S2-FE-036) */}
+                        {interactions.length === 0 ? (
+                            <p>Aún no hay comentarios. ¡Sé el primero en opinar!</p>
+                        ) : (
+                            <div>
+                                {/* Componente ReviewList o similar, que mapee `interactions` */}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Columna Derecha */}
+                <div className={styles.rightColumn}>
+
+                    {/* Sección de comentarios y rating (S2-FE-035) */}
+                    {user.isLoggedIn && (
+                        <div className={styles.reviewSection}>
+                            <InteractionForm 
+                                cursoId={id} // Le pasamos el ID del curso
+                                onReviewSubmitted={handleReviewSubmitted} // Le pasamos el callback
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 
