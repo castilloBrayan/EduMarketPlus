@@ -15,6 +15,8 @@ import NotFoundPage from './pages/NotFoundPage'
 import Navbar from './components/Navbar'
 import CheckoutPage from './pages/CheckoutPage'
 import CartSidebar from './components/CartSidebar'
+import CartPage from './pages/CartPage'
+import MyCoursesPage from './pages/MyCoursesPage'
 
 function App() {
 
@@ -33,10 +35,29 @@ function App() {
           <Route path="/courses/:id" element={<CourseDetailPage />} />
 
           <Route 
+             path="/cart" 
+             element={
+               <ProtectedRoute allowedRoles={['Estudiante']}>
+                   <CartPage />
+               </ProtectedRoute>
+             } 
+          />
+
+          <Route 
              path="/checkout" 
              element={
-               <ProtectedRoute allowedRoles={['Estudiante', 'Admin', 'Instructor', 'Asistencia']}>
+               <ProtectedRoute allowedRoles={['Estudiante']}>
                    <CheckoutPage />
+               </ProtectedRoute>
+             } 
+          />
+
+          {/* RUTA PARA MIS CURSOS (S2-FE-034) */}
+          <Route 
+             path="/my-courses" 
+             element={
+               <ProtectedRoute allowedRoles={['Estudiante']}>
+                   <MyCoursesPage />
                </ProtectedRoute>
              } 
           />

@@ -1,0 +1,121 @@
+.myCoursesContainer {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: Arial, sans-serif;
+}
+
+.myCoursesContainer h1 {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.myCoursesContainer > p { /* Selector para el párrafo justo debajo del h1 */
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.loadingContainer, .errorContainer {
+    padding: 20px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border-radius: 8px;
+    margin-top: 30px;
+}
+
+.loadingContainer {
+    color: #007bff;
+    background-color: #e6f3ff;
+}
+
+.coursesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.courseItem {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.courseItem:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.courseImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.courseInfo {
+    padding: 20px;
+}
+
+.courseInfo h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.instructor {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.date {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.startButton {
+    background-color: #28a745; /* Verde de éxito */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.startButton:hover {
+    background-color: #1e7e34;
+}
+
+.emptyMessage {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+    text-align: center;
+    padding: 50px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 10px;
+    color: #6c757d;
+    font-size: 1.2em;
+}
+
+.emptyMessage a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.emptyMessage a:hover {
+    text-decoration: underline;
+}

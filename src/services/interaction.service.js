@@ -7,7 +7,7 @@ import { Interaction } from '../models/interaction.model.js'
  * 'rating_promedio' en la tabla 'cursos' de MySQL
  * Necesita el ID del curso a actualizar
  */
-export async function updateCourseAverageRating(courseId) {
+export async function updateCourseAverageRating(cursoId) {
     try {
 
         // Asegurar que el cursoId sea un número para la consulta de MongoDB
@@ -20,10 +20,10 @@ export async function updateCourseAverageRating(courseId) {
         // Calcular el rating promedio usando Aggregate en MongoDB (Interaction Model)
         // Busca todas las interacciones (ratings) para el curso y calcula el promedio
         const aggregationResult = await Interaction.aggregate([
-            { $match: { curso_id: courseIdNum } }, 
+            { $match: { cursoId: courseIdNum } }, 
             {
                 $group: {
-                    _id: '$curso_id',
+                    _id: '$cursoId',
                     averageRating: { $avg: '$rating' },
                     totalRatings: { $sum: 1 }
                 }
@@ -40,14 +40,14 @@ export async function updateCourseAverageRating(courseId) {
             SET rating_promedio = ?, total_ratings = ?
             WHERE id = ?;
         `
-        await pool.execute(updateQuery, [averageRating, totalRatings, courseId])
+        await pool.execute(updateQuery, [averageRating, totalRatings, cursoId])
 
-        console.log(`Rating para el curso ${courseId} actualizado: ${averageRating} con ${totalRatings} votos`)
+        console.log(`Rating para el curso ${cursoId} actualizado: ${averageRating} con ${totalRatings} votos`)
 
         return { rating_promedio: averageRating, total_ratings: totalRatings }
 
     } catch (error) {
-        console.error(`Error al actualizar el rating promedio del curso ${courseId}: `, error.message)
+        console.error(`Error al actualizar el rating promedio del curso ${cursoId}: `, error.message)
         throw new Error('Error interno al calcular y actualizar el rating promedio del curso')
     }
 }
