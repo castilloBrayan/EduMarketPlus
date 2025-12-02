@@ -341,7 +341,7 @@ export const checkout = async (req, res) => {
 
         // Encontrar la orden PENDIENTE (el carrito) del usuario
         const [cartRows] = await connection.execute(
-            'SELECT id, total FROM ordenes WHERE usuario_id = ? AND estado = ?',
+            'SELECT * FROM ordenes WHERE usuario_id = ? AND estado = ?',
             [userId, PENDING_STATUS]
         )
 
@@ -353,7 +353,7 @@ export const checkout = async (req, res) => {
         }
         
         const cartId = cart.id
-        const cartTotal = parseFloat(cart.total)
+        const cartSubTotal = parseFloat(cart.total)
 
         // Validación de Carrito Vacío (total en cero)
         const [detailRows] = await connection.execute(
@@ -363,7 +363,7 @@ export const checkout = async (req, res) => {
 
         const courseCount = detailRows[0].count
 
-        if (courseCount === 0 || cartTotal <= 0.00) {
+        if (courseCount === 0 || cartSubTotal <= 0.00) {
             // Si el carrito está vacío, eliminarlo para limpiar la DB
             await connection.execute('DELETE FROM ordenes WHERE id = ?', [cartId])
             await connection.commit()
@@ -371,7 +371,7 @@ export const checkout = async (req, res) => {
         }
 
         // Simulación de Pasarela de Pago
-        console.log(`Pago de $${cartTotal.toFixed(2)} para Orden #${cartId} procesado con éxito`)
+        console.log(`Pago de $${cartSubTotal.toFixed(2)} para Orden #${cartId} procesado con éxito`)
 
         // Actualizar el estado de la orden a 'COMPLETADA' y registrar la fecha de compra
         const [updateResult] = await connection.execute(
@@ -384,12 +384,18 @@ export const checkout = async (req, res) => {
             return res.status(500).json({ error: 'Fallo al actualizar el estado de la orden. La compra no se ha completado' })
         }
 
+        const taxRate = 0.13
+        const tax = cartSubTotal * taxRate
+        const cartTotal = cartSubTotal + tax
+
         // Finalizar la transacción
         await connection.commit() 
 
         res.status(200).json({
             message: '¡Compra procesada y completada exitosamente! Tus cursos están listos',
             orderId: cartId,
+            subTotal: cartSubTotal.toFixed(2),
+            tax: tax.toFixed(2),
             total: cartTotal.toFixed(2),
             newStatus: COMPLETED_STATUS
         })
