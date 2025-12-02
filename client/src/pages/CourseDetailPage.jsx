@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
 import styles from './CourseDetailPage.module.css'
-import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock } from 'react-icons/fa'
+import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar  } from 'react-icons/fa'
+
+import InteractionForm from '../components/InteractionForm.jsx' 
+import InteractionList from '../components/InteractionList.jsx'
 
 import { useCart } from '../context/cart.hooks'
 
@@ -16,6 +19,12 @@ const CourseDetailPage = () => {
     const [course, setCourse] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    // Estado para la recarga de reviews
+    const [refreshReviews, setRefreshReviews] = useState(0)
+    
+    // Estado para el rating promedio
+    const [courseRating, setCourseRating] = useState({ average: 'N/A', count: 0 })
 
     const [cartActionStatus, setCartActionStatus] = useState({
         loading: false, 
@@ -65,6 +74,17 @@ const CourseDetailPage = () => {
             setCartActionStatus({ loading: false, error: err.message, success: null })
         }
     }
+
+    // Función para manejar la publicación exitosa de un comentario
+    const handleReviewSubmitted = () => {
+        // Incrementar el estado para forzar la recarga de la lista de reviews
+        setRefreshReviews(prev => prev + 1)
+    }
+
+    // Funcion para obtener el promedio del componente hijo
+    const handleReviewsLoaded = useCallback(({ average, count }) => {
+        setCourseRating({ average, count })
+    }, [setCourseRating]) // setCourseRating nunca cambia, pero se incluye por convención
 
     useEffect(() => {
         const fetchCourseDetails = async () => {
@@ -125,6 +145,9 @@ const CourseDetailPage = () => {
         style: 'currency',
         currency: 'USD'
     }).format(precio)
+
+    // Usar course.rating_promedio si viene del backend (MySQL), si no, usar el de MongoDB
+    const displayRating = course?.rating_promedio ? course.rating_promedio : courseRating.average
 
     return (
         <div className={styles.heroBackground}> {/* Contenedor general */}
@@ -203,6 +226,41 @@ const CourseDetailPage = () => {
                         </button>
                         <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
                     </div>
+                </div>
+            </div>
+
+            <h2>Comentarios y Valoraciones</h2>
+
+            <div className={styles.detailContainer}>                
+                {/* Columna Izquierda */}
+                <div className={styles.leftColumn}>
+
+                    {/* Lista de comentarios (Implementación detallada en S2-FE-036) */}
+                    <div className={styles.section}>
+                        {/* Aquí irá el componente para mostrar la lista de interacciones (S2-FE-036) */}
+
+                        <div>
+                            <InteractionList 
+                                cursoId={course.id} // ID del curso para fetch
+                                onReviewsLoaded={handleReviewsLoaded} // Callback para actualizar el rating en el padre
+                                triggerRefresh={refreshReviews} // Para forzar la recarga
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Columna Derecha */}
+                <div className={styles.rightColumn}>
+
+                    {/* Sección de comentarios y rating (S2-FE-035) */}
+                    {user.isLoggedIn && (
+                        <div className={styles.reviewSection}>
+                            <InteractionForm 
+                                cursoId={id} // Le pasamos el ID del curso
+                                onReviewSubmitted={handleReviewSubmitted} // Le pasamos el callback
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -139,6 +139,35 @@
     display: inline-block;
 }
 
+/* Estilos para la sección de Reviews (S2-FE-035/036) */
+
+/* Estilos para el rating en el encabezado */
+.ratingInfo {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.averageRating {
+    font-size: 1.5rem;
+    color: #ffffff; /* Color de estrella */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.starIcon {
+    color: #ffc107;
+    font-size: 1.3em;
+}
+
+.averageRating span {
+    color: #e0e0e0;
+    font-weight: normal;
+    font-size: 0.9em;
+}
+
 /* Responsividad */
 @media (max-width: 992px) {
     .detailContainer {

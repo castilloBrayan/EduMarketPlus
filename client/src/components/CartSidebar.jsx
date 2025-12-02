@@ -37,7 +37,7 @@ const CartSidebar = () => {
 
     const handleCheckout = () => {
         toggleSidebar() // Cierra el sidebar
-        navigate('/checkout') // Navega a la vista de checkout (Página de compra)
+        navigate('/cart') // Navega a la vista de checkout (Página de compra)
     }
 
     // Formato de moneda para el precio
@@ -99,7 +99,7 @@ const CartSidebar = () => {
                         onClick={handleCheckout} 
                         disabled={cartItems.length === 0}
                     >
-                        Proceder al Checkout
+                        Proceder a la compra
                     </button>
                     <Link to="/" className={styles.continueShopping} onClick={toggleSidebar}>
                         Continuar Comprando
