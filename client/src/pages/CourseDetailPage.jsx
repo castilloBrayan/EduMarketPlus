@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
@@ -20,9 +20,6 @@ const CourseDetailPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    // Estado para mantener las interacciones (Comentarios y Ratings)
-    const [interactions] = useState([])
-    
     // Estado para la recarga de reviews
     const [refreshReviews, setRefreshReviews] = useState(0)
     
@@ -85,9 +82,9 @@ const CourseDetailPage = () => {
     }
 
     // Funcion para obtener el promedio del componente hijo
-    const handleReviewsLoaded = (ratingData) => {
-        setCourseRating(ratingData);
-    }
+    const handleReviewsLoaded = useCallback(({ average, count }) => {
+        setCourseRating({ average, count })
+    }, [setCourseRating]) // setCourseRating nunca cambia, pero se incluye por convención
 
     useEffect(() => {
         const fetchCourseDetails = async () => {
@@ -232,37 +229,23 @@ const CourseDetailPage = () => {
                 </div>
             </div>
 
-            <div className={styles.detailContainer}>
+            <h2>Comentarios y Valoraciones</h2>
 
+            <div className={styles.detailContainer}>                
                 {/* Columna Izquierda */}
                 <div className={styles.leftColumn}>
 
-                    <div className={styles.ratingInfo}>
-                        {/* Se actualiza con el dato de courseRating.average */}
-                        {displayRating !== 'N/A' && (
-                             <p className={styles.averageRating}>
-                                {displayRating}
-                                <FaStar className={styles.starIcon} /> 
-                                ({courseRating.count} opiniones)
-                            </p>
-                        )}
-                    </div>
-                    
                     {/* Lista de comentarios (Implementación detallada en S2-FE-036) */}
                     <div className={styles.section}>
-                        <h2>Comentarios y Valoraciones</h2>
                         {/* Aquí irá el componente para mostrar la lista de interacciones (S2-FE-036) */}
-                        {interactions.length === 0 ? (
-                            <p>Aún no hay comentarios. ¡Sé el primero en opinar!</p>
-                        ) : (
-                            <div>
-                                <InteractionList 
-                                    cursoId={course.id} // ID del curso para fetch
-                                    onReviewsLoaded={handleReviewsLoaded} // Callback para actualizar el rating en el padre
-                                    triggerRefresh={refreshReviews} // Para forzar la recarga
-                                />
-                            </div>
-                        )}
+
+                        <div>
+                            <InteractionList 
+                                cursoId={course.id} // ID del curso para fetch
+                                onReviewsLoaded={handleReviewsLoaded} // Callback para actualizar el rating en el padre
+                                triggerRefresh={refreshReviews} // Para forzar la recarga
+                            />
+                        </div>
                     </div>
                 </div>
 

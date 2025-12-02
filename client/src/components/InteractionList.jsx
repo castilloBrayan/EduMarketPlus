@@ -11,6 +11,7 @@ const ReviewList = ({ cursoId, onReviewsLoaded, triggerRefresh }) => {
     const [reviews, setReviews] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    
     const [averageRating, setAverageRating] = useState(0.0)
 
     const fetchReviews = useCallback(async () => {
@@ -52,12 +53,15 @@ const ReviewList = ({ cursoId, onReviewsLoaded, triggerRefresh }) => {
         } finally {
             setLoading(false)
         }
-    }, [cursoId, onReviewsLoaded])
+    }, [cursoId, onReviewsLoaded, triggerRefresh])
 
     // Recarga las reviews al montar el componente o cuando se pide una actualización
     useEffect(() => {
+        // El effect se ejecutará:
+            // Al montar el componente primera vez
+            // O cuando fetchReviews cambie
         fetchReviews()
-    }, [fetchReviews, triggerRefresh]) // Usar triggerRefresh para recargar después de un POST exitoso
+    }, [fetchReviews])
 
     // Renderiza estrellas basado en el rating
     const renderStars = (rating) => {
