@@ -217,15 +217,17 @@ export const getMyCourses = async (req, res) => {
                 c.video_url,
                 u.nombre AS instructor_nombre,
                 u.foto_url AS instructor_foto_url,
-                o.fecha_compra
+                -- Usar MAX() para obtener la fecha más reciente
+                MAX(o.fecha_compra) AS fecha_ultima_compra
             FROM detalles_orden do
             JOIN ordenes o ON do.orden_id = o.id
             JOIN cursos c ON do.curso_id = c.id
             JOIN usuarios u ON c.instructor_id = u.id
             WHERE o.usuario_id = ? AND o.estado = 'COMPLETADA'
             -- Agrupar por curso ID para evitar duplicados si un curso se compró en distintas órdenes
-            GROUP BY c.id 
-            ORDER BY o.fecha_compra DESC
+            -- Para ser compatible con ONLY_FULL_GROUP_BY, se listan todas las columnas no agregadas de Cursos y Usuarios
+            GROUP BY c.id, c.titulo, c.descripcion, c.precio, c.clasificacion, c.imagen_url, c.video_url, u.nombre, u.foto_url 
+            ORDER BY fecha_ultima_compra DESC
         `
         const [courses] = await pool.execute(myCoursesQuery, [userId])
 
