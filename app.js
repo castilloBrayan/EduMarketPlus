@@ -6,6 +6,9 @@ import courseRoutes from './src/routes/course.routes.js' // Importar las rutas d
 import youtubeRoutes from './src/routes/youtube.routes.js' // Importar las rutas de YouTube
 import cartRoutes from './src/routes/cart.routes.js' // Importar rutas de Carrito
 import interactionRoutes from './src/routes/interaction.routes.js' // Importar rutas de interacción
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import Server from 'socket.io' // Clase Server de Socket.io
 
 import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
@@ -15,7 +18,26 @@ import { setupOrderModel, setupOrderDetailModel } from './src/models/order.model
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const CLIENT_PORT = process.env.CLIENT_PORT || 5173
 
+// Configuración de Socket.io
+const io = new Server(server, {
+    cors: {
+        // Permitir conexión desde frontend
+        origin: `http://localhost:${CLIENT_PORT}`, 
+        methods: ["GET", "POST"]
+    }
+})
+
+// Guardar la instancia de io en la aplicación para poder acceder a ella desde cualquier ruta
+app.set('socketio', io)
+
+// Middleware para permitir solicitudes desde el frontend
+app.use(cors())
+// Middleware para parsear el cuerpo de las solicitudes JSON
+app.use(bodyParser.json())
+// Middleware para parsear el cuerpo de las solicitudes con URL encoded
+app.use(bodyParser.urlencoded({ extended: true }))
 // Middleware esencial, Para que Express pueda leer el JSON enviado en el cuerpo de la petición POST
 app.use(express.json())
 // Middleware para leer las cookies de la petición (necesario para el Login/Auth)
@@ -46,6 +68,16 @@ await setupOrderDetailModel()
 
 // Establecer la conexión a MongoDB
 connectMongoDB()
+
+// Lógica básica de conexión de Socket.io
+io.on('connection', (socket) => {
+    console.log(`[Socket.io] Nuevo cliente conectado: ${socket.id}`)
+
+    // Escucha el evento de desconexión
+    socket.on('disconnect', () => {
+        console.log(`[Socket.io] Cliente desconectado: ${socket.id}`)
+    })
+})
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`)
