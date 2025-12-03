@@ -6,6 +6,8 @@ import courseRoutes from './src/routes/course.routes.js' // Importar las rutas d
 import youtubeRoutes from './src/routes/youtube.routes.js' // Importar las rutas de YouTube
 import cartRoutes from './src/routes/cart.routes.js' // Importar rutas de Carrito
 import interactionRoutes from './src/routes/interaction.routes.js' // Importar rutas de interacción
+import chatRoutes from './src/routes/chat.routes.js' // Importar rutas de chat
+
 import bodyParser from 'body-parser'
 
 import cors from 'cors'
@@ -52,13 +54,17 @@ app.use(cookieParser())
 // Middleware para todas las conexiones de Socket.io
 io.use(socketAuthMiddleware)
 
-// Montar rutas de autenticación
+// Montar rutas
 app.use('/api/auth', authRoutes) // Autenticación (login/register)
 app.use('/api/users', userRoutes) // Gestión de usuarios (cambio de rol)
+
 app.use('/api/courses', courseRoutes) // Gestión de cursos
 app.use('/api/youtube', youtubeRoutes) // Gestión de metadatos de YouTube
 app.use('/api/cart', cartRoutes) // Montar rutas de Carrito
+
 app.use('/api/interactions', interactionRoutes) // Gestión de interacciones (ratings/comentarios)
+
+app.use('/api/chat', chatRoutes) // Montar rutas de Chat
 
 // Probar la conexión al pool
 testConnection()
@@ -90,7 +96,7 @@ io.on('connection', (socket) => {
 
     // Escucha el evento de desconexión
     socket.on('disconnect', () => {
-        console.log(`[Socket.io] Cliente desconectado. Usuario ID: ${userId}`);
+        console.log(`[Socket.io] Cliente desconectado. Usuario ID: ${userId}`)
     })
 })
 
