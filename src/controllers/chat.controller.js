@@ -1,4 +1,4 @@
-import ChatMessage from '../models/chatMessage.model.js' // Modelo de MongoDB (S3-DB-042)
+import { ChatMessage } from '../models/chatMessage.model.js' // Modelo de MongoDB (S3-DB-042)
 import { getChatRoomId, SUPPORT_ROOM_ID } from '../utils/chatUtils.js' 
 
 /**
