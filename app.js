@@ -7,8 +7,10 @@ import youtubeRoutes from './src/routes/youtube.routes.js' // Importar las rutas
 import cartRoutes from './src/routes/cart.routes.js' // Importar rutas de Carrito
 import interactionRoutes from './src/routes/interaction.routes.js' // Importar rutas de interacción
 import bodyParser from 'body-parser'
+
 import cors from 'cors'
-import Server from 'socket.io' // Clase Server de Socket.io
+import http  from 'http' // Módulo HTTP de Node.js
+import { Server } from 'socket.io' // Clase Server de Socket.io
 
 import { testConnection } from './src/config/db.mysql.js'
 import { connectMongoDB } from './src/config/db.mongo.js'
@@ -19,6 +21,9 @@ import { setupOrderModel, setupOrderDetailModel } from './src/models/order.model
 const app = express()
 const PORT = process.env.PORT || 3000
 const CLIENT_PORT = process.env.CLIENT_PORT || 5173
+
+// Crear un servidor HTTP a partir del app Express
+const server = http.createServer(app)
 
 // Configuración de Socket.io
 const io = new Server(server, {
