@@ -1,4 +1,5 @@
 import express from 'express'
+
 import cookieParser from 'cookie-parser' // Importar el parser de cookies
 import authRoutes from './src/routes/auth.routes.js' // Importar rutas de autenticación
 import userRoutes from './src/routes/user.routes.js' // Importar las rutas de usuario
@@ -21,6 +22,7 @@ import { setupCourseModel } from './src/models/course.model.js'
 import { setupOrderModel, setupOrderDetailModel } from './src/models/order.model.js'
 import { socketAuthMiddleware } from './src/middlewares/socketAuth.middleware.js' 
 import { SUPPORT_ROOM_ID } from './src/utils/chatUtils.js'
+import { handleSendMessage } from './src/controllers/chat.controller.js' // Importar controlador de chat
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -93,6 +95,22 @@ io.on('connection', (socket) => {
     // Unir a la sala de soporte
     socket.join(SUPPORT_ROOM_ID)
     console.log(`[Socket.io] Usuario ${userId} unido a la sala: ${SUPPORT_ROOM_ID}`)
+
+    // Listener para la solicitud de unirse a una sala privada
+    socket.on('join_private_room', (data) => {
+        const { chat_room_id } = data
+        if (chat_room_id) {
+            socket.join(chat_room_id)
+            console.log(`[Socket.io] Usuario ${userId} se unió a la sala privada: ${chat_room_id}`)
+            // Emitir un evento de confirmación de vuelta
+            socket.emit('room_joined', { chat_room_id })
+        }
+    })
+
+    // Listener principal para el envío de mensajes (S3-CHAT-045)
+    socket.on('send_message', (data) => {
+        handleSendMessage(socket, data)
+    })
 
     // Escucha el evento de desconexión
     socket.on('disconnect', () => {
