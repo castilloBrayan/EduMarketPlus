@@ -9,7 +9,7 @@ import interactionRoutes from './src/routes/interaction.routes.js' // Importar r
 import bodyParser from 'body-parser'
 
 import cors from 'cors'
-import http  from 'http' // Módulo HTTP de Node.js
+import http from 'http' // Módulo HTTP de Node.js
 import { Server } from 'socket.io' // Clase Server de Socket.io
 
 import { testConnection } from './src/config/db.mysql.js'
@@ -17,6 +17,8 @@ import { connectMongoDB } from './src/config/db.mongo.js'
 import { setupUserModel } from './src/models/user.model.js'
 import { setupCourseModel } from './src/models/course.model.js'
 import { setupOrderModel, setupOrderDetailModel } from './src/models/order.model.js'
+import { socketAuthMiddleware } from './src/middlewares/socketAuth.middleware.js' 
+import { SUPPORT_ROOM_ID } from './src/utils/chatUtils.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -47,6 +49,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
 // Middleware para leer las cookies de la petición (necesario para el Login/Auth)
 app.use(cookieParser())
+// Middleware para todas las conexiones de Socket.io
+io.use(socketAuthMiddleware)
 
 // Montar rutas de autenticación
 app.use('/api/auth', authRoutes) // Autenticación (login/register)
@@ -74,13 +78,19 @@ await setupOrderDetailModel()
 // Establecer la conexión a MongoDB
 connectMongoDB()
 
-// Lógica básica de conexión de Socket.io
+// Lógica de conexión y salas de Socket.io
 io.on('connection', (socket) => {
+    const { id: userId, rol: userRole } = socket.user
+
     console.log(`[Socket.io] Nuevo cliente conectado: ${socket.id}`)
+
+    // Unir a la sala de soporte
+    socket.join(SUPPORT_ROOM_ID)
+    console.log(`[Socket.io] Usuario ${userId} unido a la sala: ${SUPPORT_ROOM_ID}`)
 
     // Escucha el evento de desconexión
     socket.on('disconnect', () => {
-        console.log(`[Socket.io] Cliente desconectado: ${socket.id}`)
+        console.log(`[Socket.io] Cliente desconectado. Usuario ID: ${userId}`);
     })
 })
 
