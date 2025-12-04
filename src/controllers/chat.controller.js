@@ -30,7 +30,7 @@ const fetchUsersInfo = async (userIds) => {
     rows.forEach(user => {
         usersMap[user.id] = {
             nombre: user.nombre,
-            foto_url: user.foto_url
+            foto_url: user.foto_url || 'default-avatar.png' // Valor por defecto si no hay foto
         }
     })
 
@@ -46,6 +46,9 @@ export const joinPrivateChat = async (req, res) => {
     const senderId = req.user.id 
     // ID del usuario con el que se desea chatear o 'support'
     const targetUserId = req.params.targetUserId 
+
+    // Parámetro de paginación, fecha del mensaje más antiguo que ya tiene el cliente
+    const beforeDate = req.query.before
     
     let chatRoomId
 
@@ -65,8 +68,28 @@ export const joinPrivateChat = async (req, res) => {
     }
 
     try {
-        // Obtener los últimos 30 mensajes de MongoDB
-        let messages = await ChatMessage.find({ chat_room_id: chatRoomId })
+        // Construir el Filtro de MongoDB
+        const filter = { 
+            chat_room_id: chatRoomId 
+        }
+
+        // Lógica de paginación, si 'beforeDate' está presente, filtrar mensajes anteriores
+        if (beforeDate) {
+            try {
+                // Asegurar que la fecha sea válida antes de usarla
+                const date = new Date(beforeDate)
+                if (isNaN(date)) throw new Error('Fecha inválida')
+                
+                // Usar $lt (Less Than) para encontrar mensajes más antiguos que la fecha proporcionada
+                filter.createdAt = { $lt: date } 
+            } catch (e) {
+                // Si la fecha es inválida, ignorar el filtro de paginación y devolver la carga inicial
+                console.warn(`[Paginación] Fecha inválida ('${beforeDate}'). Ignorando filtro`)
+            }
+        }
+
+        // Ordena por el más nuevo primero (descendente)
+        let messages = await ChatMessage.find(filter)
             .sort({ createdAt: -1 }) // Ordena por el más nuevo primero
             .limit(HISTORY_LIMIT)    // Limita a 30 mensajes
             .lean()                  // Convierte el objeto Mongoose a un objeto JS plano
@@ -87,16 +110,21 @@ export const joinPrivateChat = async (req, res) => {
             senderInfo: usersInfoMap[message.sender_id] || { nombre: 'Usuario Desconocido', foto_url: 'default-avatar.png' }
         }))
 
-        // Devolver el historial relacionado
+        // Enviar la respuesta
+        const responseMessage = beforeDate 
+            ? `Carga de ${relatedHistory.length} mensajes adicionales exitosa`
+            : 'Sala de chat generada e historial inicial recuperado con éxito'
+
+        // Devolver el historial relacionado, si lo hay
         res.status(200).json({
-            message: 'Sala de chat generada e historial recuperado con éxito',
+            message: responseMessage,
             chat_room_id: chatRoomId, // Devolver ID para unirse a la sala de Socket.io
             historial: relatedHistory
         })
 
     } catch (error) {
-        console.error('Error al obtener sala e historial: ', error)
-        res.status(500).json({ error: 'Error interno del servidor al procesar la sala de chat' })
+        console.error('Error al obtener historial de chat: ', error)
+        res.status(500).json({ error: 'Error interno del servidor al obtener historial de chat' })
     }
 }
 
