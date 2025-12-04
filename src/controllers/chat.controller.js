@@ -5,8 +5,11 @@ import { pool } from '../config/db.mysql.js' // Conexión al pool de  MySQL
 // Límite de mensajes para la carga inicial del historial
 const HISTORY_LIMIT = 30
 
+// ID para el usuario de Soporte Técnico
+const SUPPORT_USER_ID = 2
+
 /**
- * Busca el nombre y la foto de un conjunto de IDs de usuario en MySQL
+ * Buscar el nombre y la foto de un conjunto de IDs de usuario en MySQL
  * Devuelve un mapa de información de usuarios
  */
 const fetchUsersInfo = async (userIds) => {
@@ -35,6 +38,32 @@ const fetchUsersInfo = async (userIds) => {
     })
 
     return usersMap
+}
+
+/**
+ * Identificar al otro usuario en una sala de chat privada
+ */
+const getOtherUserId = (chatRoomId, currentUserId) => {
+    // Si es la sala de soporte se maneja aparte con el ID fijo
+    if (chatRoomId === SUPPORT_ROOM_ID) {
+        return SUPPORT_USER_ID
+    }
+    
+    // El formato del ID de sala es "chat_IDMENOR_IDMAYOR"
+    // Eliminar 'chat' de parts con slice(1)
+    const parts = chatRoomId.split('_').slice(1).map(id => parseInt(id))
+
+
+    // Si la sala no tiene el formato correcto, o solo un ID, retornar null
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+        return null
+    }
+
+    // Busca el ID que NO es el del usuario actual
+    const otherUserId = parts.find(id => id !== currentUserId)
+
+    // Devuelve un número válido
+    return (otherUserId && !isNaN(otherUserId)) ? otherUserId : null
 }
 
 /**
@@ -125,6 +154,132 @@ export const joinPrivateChat = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener historial de chat: ', error)
         res.status(500).json({ error: 'Error interno del servidor al obtener historial de chat' })
+    }
+}
+
+/**
+ * Obtiene la lista de conversaciones del usuario logueado (S3-CHAT-048)
+ * GET /api/chat/conversations (Protegida)
+ */
+export const getConversationsList = async (req, res) => {
+    const userId = req.user.id;
+    // Usamr el ID del usuario en formato string para la búsqueda regex
+    const userIdString = userId.toString()
+
+    try {
+        // Encontrar el último mensaje de cada sala
+        const conversations = await ChatMessage.aggregate([
+            {
+                $match: {
+                    $or: [
+                        // Sala de soporte
+                        { chat_room_id: SUPPORT_ROOM_ID }, 
+                        // Salas privadas, donde el ID del usuario aparece en el chat_room_id
+                        { chat_room_id: { $regex: new RegExp(`^chat_(${userIdString})_(\\d+)$|^chat_(\\d+)_(${userIdString})$`) } }
+                    ]
+                }
+            },
+            
+            // Ordenar por fecha de creación descendente
+            {
+                $sort: { createdAt: -1 }
+            },
+
+            // Agrupar por chat_room_id y tomar el documento completo del mensaje más reciente
+            {
+                $group: {
+                    _id: '$chat_room_id', // El ID de la sala
+                    lastMessage: { $first: '$$ROOT' } 
+                }
+            },
+
+            // Proyectar los campos que necesitamos
+            {
+                $project: {
+                    _id: 0, 
+                    chat_room_id: '$_id',
+                    lastMessageContent: '$lastMessage.content',
+                    lastMessageCreatedAt: '$lastMessage.createdAt',
+                    lastMessageSenderId: '$lastMessage.sender_id', 
+                }
+            }
+        ])
+
+        if (conversations.length === 0) {
+            return res.status(200).json({ 
+                message: 'No se encontraron conversaciones activas',
+                conversations: [] 
+            })
+        }
+
+        // Procesar y preparar las IDs para la consulta a MySQL
+        const otherUserIds = []
+
+        const processedConversations = conversations.map(conversation => {
+            const isSupport = conversation.chat_room_id === SUPPORT_ROOM_ID
+            let otherUserId = null
+
+            if (isSupport) {
+                otherUserId = SUPPORT_USER_ID
+            } else {
+                // Obtener el ID del otro usuario de la sala
+                otherUserId = getOtherUserId(conversation.chat_room_id, userId)
+            }
+
+            // Recolectar la ID solo si es un chat de usuario (no soporte)
+            if (otherUserId && otherUserId !== SUPPORT_USER_ID) {
+                otherUserIds.push(otherUserId);
+            }
+
+            return {
+                ...conversation,
+                other_user_id: otherUserId, // Añadir el ID del otro usuario
+                is_support_chat: isSupport
+            }
+        }).filter(conversation => conversation.other_user_id !== null) // Eliminar posibles conversaciones con IDs inválidas
+
+        
+        // Obtener la información de los usuarios de MySQL
+        const uniqueOtherUserIds = [...new Set(otherUserIds)]
+        const usersInfoMap = await fetchUsersInfo(uniqueOtherUserIds)
+        
+        // Añadir el info del usuario de soporte al mapa para la fusión
+        usersInfoMap[SUPPORT_USER_ID] = { nombre: 'Soporte Técnico', foto_url: '/support-avatar.png' }; 
+
+        
+        // Fusionar la información y construir la respuesta final
+        const relatedConversations = processedConversations.map(conversation => {
+            const userInfo = usersInfoMap[conversation.other_user_id] || { nombre: 'Usuario Eliminado', foto_url: 'default-avatar.png' }
+            
+            return {
+                chat_room_id: conversation.chat_room_id,
+                is_support_chat: conversation.is_support_chat,
+                other_user: {
+                    id: conversation.other_user_id,
+                    nombre: userInfo.nombre,
+                    foto_url: userInfo.foto_url,
+                },
+                last_message: {
+                    content: conversation.lastMessageContent,
+                    createdAt: conversation.lastMessageCreatedAt,
+                    // Saber si el último mensaje fue enviado por el usuario actual
+                    is_sent_by_me: conversation.lastMessageSenderId === userId 
+                }
+            }
+        })
+        
+        // Ordenar el resultado final por fecha del último mensaje (más reciente primero)
+        relatedConversations.sort((a, b) => b.last_message.createdAt.getTime() - a.last_message.createdAt.getTime())
+
+        // Enviar respuesta
+        res.status(200).json({
+            message: 'Lista de conversaciones recuperada con éxito',
+            conversations: relatedConversations
+        })
+
+    } catch (error) {
+        console.error('Error al obtener la lista de conversaciones: ', error)
+        res.status(500).json({ error: 'Error interno del servidor al obtener la lista de conversaciones' })
     }
 }
 
