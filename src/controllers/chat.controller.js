@@ -162,7 +162,7 @@ export const joinPrivateChat = async (req, res) => {
  * GET /api/chat/conversations (Protegida)
  */
 export const getConversationsList = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.id
     // Usamr el ID del usuario en formato string para la búsqueda regex
     const userIdString = userId.toString()
 
@@ -228,7 +228,7 @@ export const getConversationsList = async (req, res) => {
 
             // Recolectar la ID solo si es un chat de usuario (no soporte)
             if (otherUserId && otherUserId !== SUPPORT_USER_ID) {
-                otherUserIds.push(otherUserId);
+                otherUserIds.push(otherUserId)
             }
 
             return {
@@ -244,7 +244,7 @@ export const getConversationsList = async (req, res) => {
         const usersInfoMap = await fetchUsersInfo(uniqueOtherUserIds)
         
         // Añadir el info del usuario de soporte al mapa para la fusión
-        usersInfoMap[SUPPORT_USER_ID] = { nombre: 'Soporte Técnico', foto_url: '/support-avatar.png' }; 
+        usersInfoMap[SUPPORT_USER_ID] = { nombre: 'Soporte Técnico', foto_url: '/support-avatar.png' } 
 
         
         // Fusionar la información y construir la respuesta final
