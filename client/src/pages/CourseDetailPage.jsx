@@ -294,7 +294,7 @@ const CourseDetailPage = () => {
                         </div>
                     )}
 
-                    {( user.rol === 'Admin' || user.rol === 'Instructor' ) ? (
+                    {( user.rol === 'Admin' || user.rol === 'Instructor' ) && (
                         <div className={styles.purchaseCard}>
                             <button 
                                 className={styles.buyButton} 
@@ -305,7 +305,8 @@ const CourseDetailPage = () => {
                             </button>
                             <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
                         </div>
-                    ) : (
+                    )}
+                    {( user.rol === 'Visitante' || user.rol === null ) && (
                         <div className={styles.purchaseCard}>
                             <button 
                                 className={styles.buyButton} 
