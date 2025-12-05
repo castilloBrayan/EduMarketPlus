@@ -158,6 +158,59 @@ export const joinPrivateChat = async (req, res) => {
 }
 
 /**
+ * Endpoint para obtener el historial de mensajes de una sala de chat con paginación
+ */
+export const getChatHistory = async (req, res) => {
+    const { room_id } = req.params
+    // 'before' es un timestamp del mensaje más antiguo que esta en el cliente, cursor para paginación
+    const { before } = req.query 
+
+    if (!room_id) {
+        return res.status(400).json({ error: 'Falta el ID de la sala de chat' })
+    }
+
+    try {
+        const query = { chat_room_id: room_id }
+
+        // Lógica de paginación basada en un cursor buscar mensajes anteriores a la marca de tiempo 'before'
+        if (before) {
+            // Solo mensajes creados antes de esta fecha 'Less Than'
+            query.createdAt = { $lt: new Date(before) } 
+        }
+
+        // Buscar mensajes obteniendo los nuevos primero
+        const messages = await ChatMessage.find(query)
+            .sort({ createdAt: -1 })
+            .limit(HISTORY_LIMIT)
+            .lean()
+
+        // Extraer IDs de remitentes y obtener su información de MySQL
+        const senderIds = [...new Set(messages.map(message => message.sender_id))]
+        const senderInfoMap = await fetchUsersInfo(senderIds)
+
+        // Mapear la información del remitente a cada mensaje
+        let formattedMessages = messages.map(messag => ({
+            _id: messag._id,
+            chat_room_id: messag.chat_room_id,
+            sender_id: messag.sender_id,
+            content: messag.content,
+            createdAt: messag.createdAt,
+            senderInfo: senderInfoMap[messag.sender_id] || { nombre: 'Usuario Desconocido', foto_url: 'default-avatar.png' },
+        }))
+
+        // Invertir el orden, de más antiguo a más nuevo
+        formattedMessages.reverse() 
+
+        // Devolvemos el array de mensajes (máximo 30)
+        return res.status(200).json(formattedMessages)
+
+    } catch (error) {
+        console.error('Error al obtener el historial de chat: ', error)
+        return res.status(500).json({ error: 'Error interno del servidor al obtener el historial de chat' })
+    }
+}
+
+/**
  * Obtiene la lista de conversaciones del usuario logueado (S3-CHAT-048)
  * GET /api/chat/conversations (Protegida)
  */

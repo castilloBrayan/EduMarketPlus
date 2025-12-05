@@ -29,14 +29,15 @@ const PORT = process.env.PORT || 3000
 const CLIENT_PORT = process.env.CLIENT_PORT || 5173
 
 // Crear un servidor HTTP a partir del app Express
-const server = http.createServer(app)
+const httpServer = http.createServer(app)
 
 // Configuración de Socket.io
-const io = new Server(server, {
+const io = new Server(httpServer, {
     cors: {
         // Permitir conexión desde frontend
-        origin: `http://localhost:${CLIENT_PORT}`, 
-        methods: ["GET", "POST"]
+        origin: process.env.VITE_FRONTEND_URL, 
+        methods: ["GET", "POST"],
+        credentials: true
     }
 })
 
@@ -44,7 +45,11 @@ const io = new Server(server, {
 app.set('socketio', io)
 
 // Middleware para permitir solicitudes desde el frontend
-app.use(cors())
+app.use(cors({
+    origin: process.env.VITE_FRONTEND_URL,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Para que Express acepte la cookie
+}))
 // Middleware para parsear el cuerpo de las solicitudes JSON
 app.use(bodyParser.json())
 // Middleware para parsear el cuerpo de las solicitudes con URL encoded
@@ -118,6 +123,7 @@ io.on('connection', (socket) => {
     })
 })
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`)
+// Iniciar el servidor HTTP (no solo la app de Express)
+httpServer.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`)
 })
