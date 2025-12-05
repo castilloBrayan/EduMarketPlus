@@ -146,7 +146,7 @@ const CourseDetailPage = () => {
     // Iniciar el chat con el instructor
     const handleChatWithInstructor = () => {
         // Validar que estemos login
-        if (!user.isLoggedIn) {
+        if (!user) {
             alert('Debes iniciar sesión para chatear con el instructor')
             return
         }
@@ -167,7 +167,7 @@ const CourseDetailPage = () => {
         // joinChatRoom inicia la sala, y setChatWindowOpen abre el chatbox flotante (S3-FE-055)
         joinChatRoom(course.instructor_id)
 
-        setChatWindowOpen(true) 
+        setChatWindowOpen(true)
     }
 
     if (loading) {

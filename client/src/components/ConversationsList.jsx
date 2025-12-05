@@ -10,7 +10,7 @@ const ConversationsList = () => {
         unreadConversations 
     } = useChatSocket()
     
-    const { token } = useAuth()
+    const { user } = useAuth()
     
     const [conversations, setConversations] = useState([])
     const [isLoading, setIsLoading] = useState(true)
@@ -22,14 +22,16 @@ const ConversationsList = () => {
             setIsLoading(true)
             setError(null)
             try {
-                const response = await fetch(`/api/chat/conversations`)
+                const response = await fetch(`/api/chat/conversations`, {
+                    credentials: 'include' 
+                })
                 
                 if (!response.ok) {
                     throw new Error('No se pudo cargar la lista de conversaciones')
                 }
                 
                 const data = await response.json()
-                setConversations(data)
+                setConversations(data.conversations || []) // Asegurar que accedemos a la propiedad correcta según tu controller
 
             } catch (err) {
                 console.error(err)
@@ -39,10 +41,12 @@ const ConversationsList = () => {
             }
         }
 
-        if (token) {
+        // CAMBIO: Verificar si existe el usuario, no el token
+        if (user && user.id) {
             fetchConversations()
         }
-    }, [token])
+
+    }, [user])
 
 
     // Función para manejar la selección de una conversación
