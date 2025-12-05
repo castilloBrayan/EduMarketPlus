@@ -19,6 +19,7 @@ export const ChatSocketProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false) // Estado de conexión del socket
     const [chatError, setChatError] = useState(null) // Para errores de socket/chat
     const [currentChatTarget, setCurrentChatTarget] = useState(null) // Info del otro usuario
+    const [isChatWindowOpen, setIsChatWindowOpen] = useState(false) // Controla si la ventana flotante está visible (S3-FE-055)
 
     // Estados de paginación
     const [isLoadingHistory, setIsLoadingHistory] = useState(false) 
@@ -266,6 +267,16 @@ export const ChatSocketProvider = ({ children }) => {
         })
 
     }
+
+    // Toggle para abrir/cerrar la ventana de chat (S3-FE-055)
+    const toggleChatWindow = useCallback(() => {
+        setIsChatWindowOpen(prev => !prev)
+    }, [])
+    
+    // Función para abrir la ventana directamente
+    const setChatWindowOpen = useCallback((isOpen) => {
+        setIsChatWindowOpen(isOpen)
+    }, [])
     
     // Función para el scroll
     const loadMoreMessages = async () => {
@@ -287,10 +298,13 @@ export const ChatSocketProvider = ({ children }) => {
         isLoadingHistory, 
         hasMoreHistory, 
         unreadConversations,
+        isChatWindowOpen,
         joinChatRoom,
         sendChatMessage,
         loadMoreMessages,
         markRoomAsRead,
+        toggleChatWindow,
+        setChatWindowOpen,
     }
 
     return (

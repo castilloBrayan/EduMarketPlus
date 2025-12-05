@@ -18,6 +18,7 @@ import CartSidebar from './components/CartSidebar'
 import CartPage from './pages/CartPage'
 import MyCoursesPage from './pages/MyCoursesPage'
 import SupportPage from './pages/SupportPage'
+import ChatBox from './components/ChatBox.jsx'
 
 function App() {
 
@@ -90,6 +91,10 @@ function App() {
       </div>
 
       <CartSidebar />
+
+      {/* ChatBox flotante (S3-FE-055) */}
+      <ChatBox />
+
     </Router>
   )
 }
