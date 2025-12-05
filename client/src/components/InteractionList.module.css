@@ -1,11 +1,12 @@
 .reviewListContainer {
+    text-align: left;
     margin-top: 20px;
 }
 
 .averageRatingBox {
     display: flex;
     align-items: center;
-    background-color: #2a2a2a; /* Fondo más oscuro para el promedio */
+    background-color: rgba(194, 194, 194, 0.151); /* Fondo más oscuro para el promedio */
     padding: 15px 25px;
     border-radius: 8px;
     margin-bottom: 25px;
@@ -42,7 +43,7 @@
 }
 
 .loadingMessage {
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 0.151);
     color: #007bff;
 }
 
@@ -52,7 +53,7 @@
 }
 
 .noReviews {
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 0.151);
     color: #aaa;
     font-style: italic;
 }
@@ -65,7 +66,7 @@
 }
 
 .reviewCard {
-    background: #333;
+    background: rgba(255, 255, 255, 0.151);
     padding: 20px;
     border-radius: 8px;
     border-left: 5px solid #007bff; /* Detalle de color */

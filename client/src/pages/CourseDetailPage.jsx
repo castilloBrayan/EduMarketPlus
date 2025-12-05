@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
 import styles from './CourseDetailPage.module.css'
-import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar  } from 'react-icons/fa'
+import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar, FaCommentDots  } from 'react-icons/fa'
 
 import InteractionForm from '../components/InteractionForm.jsx' 
 import InteractionList from '../components/InteractionList.jsx'
 
 import { useCart } from '../context/cart.hooks'
+import { useChatSocket } from '../context/chatSocket.hooks.js'
 
 const CourseDetailPage = () => {
     // Obtener el ID del curso de la URL
@@ -26,11 +27,19 @@ const CourseDetailPage = () => {
     // Estado para el rating promedio
     const [courseRating, setCourseRating] = useState({ average: 'N/A', count: 0 })
 
+    const [videoMetadata, setVideoMetadata] = useState({
+        publishedDate: 'Dic 2025',
+        duration: 'O h',
+        
+    })
+    
     const [cartActionStatus, setCartActionStatus] = useState({
         loading: false, 
         error: null, 
         success: null
     })
+
+    const { joinChatRoom, setChatWindowOpen } = useChatSocket()
 
     // Lógica para agregar al carrito (S2-CART-025)
     const handleAddToCart = async () => {
@@ -106,6 +115,22 @@ const CourseDetailPage = () => {
 
                 setCourse(result.data)
 
+                // Obtener metadata del video
+                try {
+                    if (result.data.video_url) {
+                        const youtubeResponse = await fetch(`/api/youtube/metadata?url=${encodeURIComponent(result.data.video_url)}`)
+                        const youtubeResult = await youtubeResponse.json()
+
+                        if (youtubeResponse.ok) {
+                            // Éxito, guardar los metadatos
+                            setVideoMetadata(youtubeResult.data)
+                        } else {
+                            console.error('Error al obtener metadatos de YouTube:', youtubeResult.error)
+                        }                    }
+                } catch (err) {
+                    console.error('Error de red al validar URL: ', err)
+                }
+
             } catch (err) {
                 console.error(`Error al obtener el ID ${id} del curso: `, err)
                 setError(err.message)
@@ -117,6 +142,33 @@ const CourseDetailPage = () => {
         fetchCourseDetails()
 
     }, [id]) // Dependencia del ID para recargar si el parámetro cambia
+
+    // Iniciar el chat con el instructor
+    const handleChatWithInstructor = () => {
+        // Validar que estemos login
+        if (!user) {
+            alert('Debes iniciar sesión para chatear con el instructor')
+            return
+        }
+        
+        // Validar que el curso y el instructor existan
+        if (!course || !course.instructor_id) {
+            alert('No se pudo encontrar la información del instructor')
+            return
+        }
+
+        // No chatear consigo mismo (si el usuario es el instructor)
+        if (course.instructor_id === user.id) {
+            alert('¡No puedes chatear contigo mismo! Usa la vista de soporte para gestionar tus chats')
+            return
+        }
+
+        // Iniciar la conversación
+        // joinChatRoom inicia la sala, y setChatWindowOpen abre el chatbox flotante (S3-FE-055)
+        joinChatRoom(course.instructor_id)
+
+        setChatWindowOpen(true)
+    }
 
     if (loading) {
         return <div className="loadingMessage">Cargando detalles del curso...</div>
@@ -184,9 +236,22 @@ const CourseDetailPage = () => {
                             <FaCalendarAlt className={styles.metaIcon} />
                             <span>Dic 2025</span> <hr />
                             <FaClock className={styles.metaIcon} />
-                            <span>0 h</span> <hr />
+                            <span>O h</span> <hr />
                             <span className={styles.classificationTag}>{clasificacion}</span> <hr />
                             <span className={styles.instructorBadge}>{instructor_nombre}</span>
+
+                            {/* BOTÓN DE CHAT (S3-FE-054) */}
+                            {/* Solo mostrar si no es el instructor y está logueado */}
+                            {user.isLoggedIn && course.instructor_id !== user.id && (
+                                <button 
+                                    onClick={handleChatWithInstructor} 
+                                    className={styles.chatButton}
+                                    title="Chatear con el instructor"
+                                >
+                                    <FaCommentDots /> Chatear
+                                </button>
+                            )}
+
                         </div>
                     </div>
 
@@ -203,33 +268,66 @@ const CourseDetailPage = () => {
                 {/* Columna Derecha */}
                 <div className={styles.rightColumn}>
 
-                    {/* Botón de Compra */}
-                    <div className={styles.purchaseCard}>
-                        {cartActionStatus.success && (
-                            <div className={styles.successMessage}>{cartActionStatus.success}</div>
-                        )}
-                        {cartActionStatus.error && (
-                            <div className={styles.errorMessage}>{cartActionStatus.error}</div>
-                        )}
-                        <button 
-                            className={styles.buyButton} 
-                            onClick={handleAddToCart}
-                            disabled={cartActionStatus.loading} // Desactivar si está cargando
-                        >
-                            <FaShoppingCart className={styles.buyButtonIcon} />
-                            <span>
-                                {cartActionStatus.loading 
-                                    ? 'Añadiendo...' 
-                                    : `Cómpralo por ${formattedPrice}`
-                                }
-                            </span>
-                        </button>
-                        <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
-                    </div>
+                    {/* Botón de Compra Condicional */}
+                    {( user.rol === 'Estudiante' ) && (
+                        <div className={styles.purchaseCard}>
+                            {cartActionStatus.success && (
+                                <div className={styles.successMessage}>{cartActionStatus.success}</div>
+                            )}
+                            {cartActionStatus.error && (
+                                <div className={styles.errorMessage}>{cartActionStatus.error}</div>
+                            )}
+                            <button 
+                                className={styles.buyButton} 
+                                onClick={handleAddToCart}
+                                disabled={cartActionStatus.loading} // Desactivar si está cargando
+                            >
+                                <FaShoppingCart className={styles.buyButtonIcon} />
+                                <span>
+                                    {cartActionStatus.loading 
+                                        ? 'Añadiendo...' 
+                                        : `Cómpralo por ${formattedPrice}`
+                                    }
+                                </span>
+                            </button>
+                            <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
+                        </div>
+                    )}
+
+                    {( user.rol === 'Admin' || user.rol === 'Instructor' ) && (
+                        <div className={styles.purchaseCard}>
+                            <button 
+                                className={styles.buyButton} 
+                            >
+                                <span>
+                                    Editar información del curso
+                                </span>
+                            </button>
+                            <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
+                        </div>
+                    )}
+                    {( user.rol === 'Visitante' || user.rol === null ) && (
+                        <div className={styles.purchaseCard}>
+                            <button 
+                                className={styles.buyButton} 
+                                disabled={true}
+                            >
+                                <FaShoppingCart className={styles.buyButtonIcon} />
+                                <span>
+                                    Registrate y podrás comprar cursos
+                                </span>
+                            </button>
+                            <small className={styles.purchaseNote}>Obten acceso de por vida solo a este curso</small>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <h2>Comentarios y Valoraciones</h2>
+            <br />
+            <hr className={styles.sectionDivider} />
+            <br />
+
+            <h2 className={styles.sectionTitle}>Comentarios y Valoraciones</h2>
 
             <div className={styles.detailContainer}>                
                 {/* Columna Izquierda */}
