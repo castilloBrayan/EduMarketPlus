@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/auth.hooks' // Se usara para el boton de compra
 
 import styles from './CourseDetailPage.module.css'
-import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar  } from 'react-icons/fa'
+import { FaShoppingCart, FaCheckCircle, FaCalendarAlt, FaClock, FaStar, FaCommentDots  } from 'react-icons/fa'
 
 import InteractionForm from '../components/InteractionForm.jsx' 
 import InteractionList from '../components/InteractionList.jsx'
 
 import { useCart } from '../context/cart.hooks'
+import { useChatSocket } from '../context/chatSocket.hooks.js'
 
 const CourseDetailPage = () => {
     // Obtener el ID del curso de la URL
@@ -31,6 +32,8 @@ const CourseDetailPage = () => {
         error: null, 
         success: null
     })
+
+    const { joinChatRoom, setChatWindowOpen } = useChatSocket()
 
     // Lógica para agregar al carrito (S2-CART-025)
     const handleAddToCart = async () => {
@@ -118,6 +121,33 @@ const CourseDetailPage = () => {
 
     }, [id]) // Dependencia del ID para recargar si el parámetro cambia
 
+    // Iniciar el chat con el instructor
+    const handleChatWithInstructor = () => {
+        // Validar que estemos login
+        if (!user.isLoggedIn) {
+            alert('Debes iniciar sesión para chatear con el instructor')
+            return
+        }
+        
+        // Validar que el curso y el instructor existan
+        if (!course || !course.instructor_id) {
+            alert('No se pudo encontrar la información del instructor')
+            return
+        }
+
+        // No chatear consigo mismo (si el usuario es el instructor)
+        if (course.instructor_id === user.id) {
+            alert('¡No puedes chatear contigo mismo! Usa la vista de soporte para gestionar tus chats')
+            return
+        }
+
+        // Iniciar la conversación
+        // joinChatRoom inicia la sala, y setChatWindowOpen abre el chatbox flotante (S3-FE-055)
+        joinChatRoom(course.instructor_id)
+        
+        // setChatWindowOpen(true) 
+    }
+
     if (loading) {
         return <div className="loadingMessage">Cargando detalles del curso...</div>
     }
@@ -187,6 +217,19 @@ const CourseDetailPage = () => {
                             <span>0 h</span> <hr />
                             <span className={styles.classificationTag}>{clasificacion}</span> <hr />
                             <span className={styles.instructorBadge}>{instructor_nombre}</span>
+
+                            {/* BOTÓN DE CHAT (S3-FE-054) */}
+                            {/* Solo mostrar si no es el instructor y está logueado */}
+                            {user.isLoggedIn && course.instructor_id !== user.id && (
+                                <button 
+                                    onClick={handleChatWithInstructor} 
+                                    className={styles.chatButton}
+                                    title="Chatear con el instructor"
+                                >
+                                    <FaCommentDots /> Chatear
+                                </button>
+                            )}
+
                         </div>
                     </div>
 

@@ -1,8 +1,7 @@
 import React from 'react'
-import ChatWindow from '../components/Chat/ChatWindow.jsx'
-import ConversationsList from '../components/Chat/ConversationsList.jsx'
+import ChatWindow from '../components/ChatWindow.jsx'
+import ConversationsList from '../components/ConversationsList.jsx'
 
-import './SupportPage.module.css' // Estilos para la vista
 
 const SupportPage = () => {
     return (
