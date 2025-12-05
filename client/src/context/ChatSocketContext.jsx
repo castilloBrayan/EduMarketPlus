@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import io from 'socket.io-client' // Importar el cliente de Socket.io
 
-import ChatSocketContext from './chatSocket.hooks' // Importar el contexto chatSocket
+import { ChatSocketContext } from './chatSocket.hooks' // Importar el contexto chatSocket
 
 const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -21,23 +21,13 @@ export const ChatSocketProvider = ({ children }) => {
     useEffect(() => {
         // La forma más segura de obtener la cookie JWT es de un contexto de autenticación
         // TODO: Usar el contexto de autenticación para obtener la cookie JWT
-        const token = localStorage.getItem('token')
-        
-        if (!token) {
-            console.error("Token de autenticación no encontrado, no se puede conectar Socket.io")
-            return
-        }
 
-        console.log(`Creando la conexión, token: ${token} con la url: ${SOCKET_SERVER_URL}`)
-
-        // Crear la conexión con el token para la autenticación en el middleware de backend
         const newSocket = io(SOCKET_SERVER_URL, {
-            auth: {
-                token: token,
-            },
-            transports: ['websocket']
+            // El token se pasa por cookie
+            auth: {}, 
+            withCredentials: true, // Para que la cookie `token` se envíe
         })
-
+        
         socketRef.current = newSocket
         
         // Eventos del Socket
