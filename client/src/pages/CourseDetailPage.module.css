@@ -26,6 +26,23 @@
     text-align: left;
 }
 
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    color: var(--text-color);
+    text-align: left;
+}
+
+.sectionDivider {
+    margin: 2rem 0;
+    border: none;
+    height: 2px;
+    background-color: rgba(0, 162, 255, 0.308);
+    border-radius: 5px; /* Adds rounded corners */
+}
+
 .shortDescription { 
     font-size: 1.2rem;
     line-height: 1.6;

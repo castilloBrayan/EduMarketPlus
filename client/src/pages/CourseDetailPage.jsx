@@ -272,7 +272,11 @@ const CourseDetailPage = () => {
                 </div>
             </div>
 
-            <h2>Comentarios y Valoraciones</h2>
+            <br />
+            <hr className={styles.sectionDivider} />
+            <br />
+
+            <h2 className={styles.sectionTitle}>Comentarios y Valoraciones</h2>
 
             <div className={styles.detailContainer}>                
                 {/* Columna Izquierda */}
