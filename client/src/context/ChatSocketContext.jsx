@@ -78,11 +78,7 @@ export const ChatSocketProvider = ({ children }) => {
         const beforeQuery = beforeTimestamp ? `&before=${beforeTimestamp}` : ''
 
         try {
-            const response = await fetch(`/api/chat/history/${roomId}?${beforeQuery}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+            const response = await fetch(`/api/chat/history/${roomId}?${beforeQuery}`)
 
             if (!response.ok) {
                 const errorData = await response.json()
@@ -209,13 +205,7 @@ export const ChatSocketProvider = ({ children }) => {
 
         // Llamar al endpoint REST para obtener el historial y el ID de sala canónico
         try {
-            const response = await fetch(`/api/chat/${targetUserId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                }
-            })
+            const response = await fetch(`/api/chat/${targetUserId}`)
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }))

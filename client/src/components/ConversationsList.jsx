@@ -22,11 +22,7 @@ const ConversationsList = () => {
             setIsLoading(true)
             setError(null)
             try {
-                const response = await fetch(`/api/chat/conversations`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
+                const response = await fetch(`/api/chat/conversations`)
                 
                 if (!response.ok) {
                     throw new Error('No se pudo cargar la lista de conversaciones')
