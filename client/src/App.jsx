@@ -17,6 +17,7 @@ import CheckoutPage from './pages/CheckoutPage'
 import CartSidebar from './components/CartSidebar'
 import CartPage from './pages/CartPage'
 import MyCoursesPage from './pages/MyCoursesPage'
+import SupportPage from './pages/SupportPage'
 
 function App() {
 
@@ -71,6 +72,16 @@ function App() {
                 <CreateCoursePage />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Vista de Soporte y Gestión de Conversaciones (S3-FE-053) */}
+          <Route 
+             path="/support" 
+             element={
+               <ProtectedRoute allowedRoles={['Admin', 'Soporte']}>
+                   <SupportPage />
+               </ProtectedRoute>
+             } 
           />
           
           {/* Ruta 'Catch-all' (404) */}
