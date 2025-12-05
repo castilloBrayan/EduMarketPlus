@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import io from 'socket.io-client' // Importar el cliente de Socket.io
-
+import { useAuth } from '../context/auth.hooks.js'
 import { ChatSocketContext } from './chatSocket.hooks' // Importar el contexto chatSocket
 
 const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+const API_BASE_URL = `/api/chat` // Base URL para llamadas HTTP
+
 export const ChatSocketProvider = ({ children }) => {
     // Referencia mutable para mantener la instancia del socket a través de re-renders
     const socketRef = useRef(null) 
+    const { token, user } = useAuth() // Obtener token de autenticación del contexto auth
+    const currentUserId = user?.id
     
     // Estado principal de la conversación
     const [messages, setMessages] = useState([]) // Historial de mensajes de la sala activa
@@ -16,6 +20,99 @@ export const ChatSocketProvider = ({ children }) => {
     const [chatError, setChatError] = useState(null) // Para errores de socket/chat
     const [currentChatTarget, setCurrentChatTarget] = useState(null) // Info del otro usuario
 
+    // Estados de paginación
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false) 
+    const [hasMoreHistory, setHasMoreHistory] = useState(true) // Hay más mensajes al inicio
+    
+    // Estados de notificación
+    const [unreadConversations, setUnreadConversations] = useState({})
+    const notificationSoundRef = useRef(new Audio('/assets/notification.mp3'))
+
+    // Función para reproducir el sonido de notificación
+    const playNotificationSound = () => {
+        try {
+            notificationSoundRef.current.play()
+        } catch (error) {
+            console.warn("No se pudo reproducir el sonido de notificación: ", error)
+        }
+    }
+
+    // Lógica de Notificación Global (S3-FE-052)
+    const handleGlobalNotification = useCallback((message) => {
+        playNotificationSound()
+
+        // Actualizar el estado de conversaciones no leídas
+        setUnreadConversations(prev => {
+            const roomId = message.chat_room_id
+
+            // Si el mensaje viene del usuario actual no contar como no leído global
+            if (message.sender_id === currentUserId) return prev 
+
+            const newCount = (prev[roomId] || 0) + 1
+            return { ...prev, [roomId]: newCount }
+        })
+    }, [currentUserId]) // Depende de currentUserId
+
+    // Función para marcar una sala como leída (al cambiar o abrir un chat)
+    const markRoomAsRead = useCallback((roomId) => {
+        setUnreadConversations(prev => {
+            const newState = { ...prev }
+            delete newState[roomId]  // Eliminar el contador de esa sala
+            return newState
+        })
+        // TODO: Enviar una petición al backend para marcar como leídos en la DB (extra)
+    }, [])
+
+    // Cargar historial de mensajes inicial o más mensajes (S3-CHAT-047)
+    const loadHistory = async (roomId, beforeTimestamp = null) => {
+        
+        if (isLoadingHistory || (!hasMoreHistory && beforeTimestamp)) {
+            return []
+        }
+        
+        setIsLoadingHistory(true)
+
+        const token = localStorage.getItem('token') // Usar el token para Auth HTTP
+        
+        const beforeQuery = beforeTimestamp ? `&before=${beforeTimestamp}` : ''
+
+        try {
+            const response = await fetch(`/api/chat/history/${roomId}?${beforeQuery}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Error desconocido al cargar historial')
+            }
+
+            const newMessages = await response.json() 
+            
+            // Si se cargan menos de 30 mensajes, es el inicio
+            if (newMessages.length < 30) { 
+                setHasMoreHistory(false)
+            }
+            
+            if (beforeTimestamp) {
+                // Es una carga de más mensajes, insertar al inicio
+                setMessages(prevMessages => [...newMessages, ...prevMessages])
+            } else {
+                // Es la carga inicial, reemplazar
+                setMessages(newMessages)
+            }
+            
+            return newMessages
+
+        } catch (error) {
+            console.error('Error al cargar el historial de chat: ', error)
+            setChatError(`Error al cargar el historial: ${error.message}`)
+            return [] 
+        } finally {
+            setIsLoadingHistory(false)
+        }
+    }
 
     // Conexión del Socket
     useEffect(() => {
@@ -29,8 +126,23 @@ export const ChatSocketProvider = ({ children }) => {
         })
         
         socketRef.current = newSocket
+
+        const handleReceiveMessage = (message) => {
+
+            // Si el usuario está en la sala activa, añadir mensaje
+            if (message.chat_room_id !== chatRoomId) {
+                // S3-FE-052: Mostrar notificación si NO es la sala activa
+                handleGlobalNotification(message) 
+                return
+            }
+            
+            // Añadir si es de la sala activa
+            setMessages(prevMessages => [...prevMessages, message])
+        }
         
         // Eventos del Socket
+
+        socketRef.current.on('receive_message', handleReceiveMessage)
 
         // Conexión exitosa
         newSocket.on('connect', () => {
@@ -74,8 +186,7 @@ export const ChatSocketProvider = ({ children }) => {
         return () => {
             newSocket.disconnect()
         }
-    }, [chatRoomId])
-
+    }, [token, chatRoomId, handleGlobalNotification])
     
     // Funciones Principales de Interacción con el Chat
 
@@ -123,6 +234,13 @@ export const ChatSocketProvider = ({ children }) => {
                 })
             }
 
+            // Cargar el historial inicial
+            setHasMoreHistory(true)
+            await loadHistory(chat_room_id) 
+            
+            // Marcar sala como leída al unirse
+            markRoomAsRead(chat_room_id)
+
             // Emitir evento al backend para unirse a la sala
             socketRef.current.emit('join_room', { chat_room_id })
             
@@ -133,7 +251,6 @@ export const ChatSocketProvider = ({ children }) => {
             setChatError(error.message.includes('Error desconocido') ? 'Error al cargar el chat' : error.message)
         }
     }
-
 
     // Envía un mensaje a la sala activa, necesita el contenido del mensaje
     const sendChatMessage = (content) => {
@@ -149,6 +266,15 @@ export const ChatSocketProvider = ({ children }) => {
         })
 
     }
+    
+    // Función para el scroll
+    const loadMoreMessages = async () => {
+        if (messages.length === 0 || !chatRoomId) return 
+        
+        // El cursor es el 'createdAt' del mensaje más antiguo
+        const oldestMessageTimestamp = messages[0].createdAt 
+        await loadHistory(chatRoomId, oldestMessageTimestamp)
+    }
 
 
     // Valor del Contexto
@@ -158,9 +284,13 @@ export const ChatSocketProvider = ({ children }) => {
         isConnected,
         chatError,
         currentChatTarget,
+        isLoadingHistory, 
+        hasMoreHistory, 
+        unreadConversations,
         joinChatRoom,
         sendChatMessage,
-        // TODO: Función paginación para cargar más mensajes (S3-CHAT-047)
+        loadMoreMessages,
+        markRoomAsRead,
     }
 
     return (
