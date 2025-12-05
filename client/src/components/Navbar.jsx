@@ -41,7 +41,7 @@ const Navbar = () => {
 
                 {/* Enlace condicional, crear curso (solo para admin e instructor) */}
                 {(user.rol === 'Admin' || user.rol === 'Instructor') && (
-                    <Link to="/instructor/create" className={styles.createCourseBtn}>Crear Curso</Link>
+                    <Link to="/instructor/create" className={styles.navItemSignUp}>Crear Curso</Link>
                 )}
 
                 {/* Sección de Autenticación Condicional */}
@@ -64,16 +64,16 @@ const Navbar = () => {
                     )}
                     
                     <div className={styles.userInfo}>
+                    
+                        <button onClick={handleLogout} className={styles.logoutButton}>
+                            Cerrar Sesión
+                        </button>
+
                         <img 
                             src={user.foto_url || DEFAULT_AVATAR}
                             alt={user.nombre || 'Usuario'}
                             className={styles.userAvatar}
                         />
-                        
-                        <span className={styles.userName}>Hola {user.nombre}, ({user.rol})</span>
-                        <button onClick={handleLogout} className={styles.logoutButton}>
-                            Cerrar Sesión
-                        </button>
                     </div>
                     </>
 

@@ -17,6 +17,8 @@ import CheckoutPage from './pages/CheckoutPage'
 import CartSidebar from './components/CartSidebar'
 import CartPage from './pages/CartPage'
 import MyCoursesPage from './pages/MyCoursesPage'
+import SupportPage from './pages/SupportPage'
+import ChatBox from './components/ChatBox.jsx'
 
 function App() {
 
@@ -72,6 +74,16 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          {/* Vista de Soporte y Gestión de Conversaciones (S3-FE-053) */}
+          <Route 
+             path="/support" 
+             element={
+               <ProtectedRoute allowedRoles={['Admin', 'Soporte']}>
+                   <SupportPage />
+               </ProtectedRoute>
+             } 
+          />
           
           {/* Ruta 'Catch-all' (404) */}
           <Route path="*" element={<NotFoundPage />} />
@@ -79,6 +91,10 @@ function App() {
       </div>
 
       <CartSidebar />
+
+      {/* ChatBox flotante (S3-FE-055) */}
+      <ChatBox />
+
     </Router>
   )
 }

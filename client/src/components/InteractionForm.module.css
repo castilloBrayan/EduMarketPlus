@@ -1,21 +1,21 @@
 .reviewFormContainer {
-    background: #ffffff;
+    background: rgba(0, 115, 255, 0.24);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     margin-top: 30px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #e0e0e028;
 }
 
 .reviewFormContainer h2 {
-    color: #333;
+    color: var(--text-color);
     margin-top: 0;
     margin-bottom: 5px;
     font-size: 1.8em;
 }
 
 .reviewFormContainer p {
-    color: #666;
+    color: #acacac;
     margin-bottom: 20px;
 }
 
@@ -47,15 +47,21 @@
 }
 
 .textarea {
+    background-color: rgba(255, 255, 255, 0.151);
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc28;
     border-radius: 8px;
     resize: vertical;
     font-family: inherit;
     font-size: 1em;
     box-sizing: border-box; 
     min-height: 100px;
+}
+textarea:focus {
+  border-color: #007bff; /* Borde azul */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Sombra azul */
+  outline: none; /* Quita el borde por defecto del navegador */
 }
 
 .charCount {

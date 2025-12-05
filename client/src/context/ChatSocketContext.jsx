@@ -19,6 +19,7 @@ export const ChatSocketProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false) // Estado de conexión del socket
     const [chatError, setChatError] = useState(null) // Para errores de socket/chat
     const [currentChatTarget, setCurrentChatTarget] = useState(null) // Info del otro usuario
+    const [isChatWindowOpen, setIsChatWindowOpen] = useState(false) // Controla si la ventana flotante está visible (S3-FE-055)
 
     // Estados de paginación
     const [isLoadingHistory, setIsLoadingHistory] = useState(false) 
@@ -71,16 +72,12 @@ export const ChatSocketProvider = ({ children }) => {
         }
         
         setIsLoadingHistory(true)
-
-        const token = localStorage.getItem('token') // Usar el token para Auth HTTP
         
         const beforeQuery = beforeTimestamp ? `&before=${beforeTimestamp}` : ''
 
         try {
             const response = await fetch(`/api/chat/history/${roomId}?${beforeQuery}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             })
 
             if (!response.ok) {
@@ -198,25 +195,17 @@ export const ChatSocketProvider = ({ children }) => {
             return
         }
 
-        // Obtener el token de autenticación para la petición REST
-        const token = localStorage.getItem('token')
-
-        if (!token) {
-            setChatError("Token de autenticación no encontrado")
-            return
-        }
-
         // Llamar al endpoint REST para obtener el historial y el ID de sala canónico
         try {
             const response = await fetch(`/api/chat/${targetUserId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                }
+                credentials: 'include' 
             })
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    setChatError("Sesión expirada. Por favor inicia sesión nuevamente")
+                    return
+                }
                 const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }))
                 throw new Error(errorData.error || `Error en la petición HTTP, status: ${response.status}`)
             }
@@ -227,10 +216,12 @@ export const ChatSocketProvider = ({ children }) => {
             if (chat_room_id !== chatRoomId) {
                 setMessages(historial)
                 setChatRoomId(chat_room_id)
+
+                // Lógica para poner nombre si no es soporte
+                const isSupport = targetUserId === 'support' || targetUserId === '2';
                 setCurrentChatTarget({ 
                     id: targetUserId, 
-                    // TODO: buscar info del usuario objetivo si no es soporte
-                    nombre: targetUserId === '2' ? 'Soporte Técnico' : `Usuario ${targetUserId}`
+                    nombre: isSupport ? 'Soporte Técnico' : `Usuario ${targetUserId}` 
                 })
             }
 
@@ -243,6 +234,8 @@ export const ChatSocketProvider = ({ children }) => {
 
             // Emitir evento al backend para unirse a la sala
             socketRef.current.emit('join_room', { chat_room_id })
+
+            setIsChatWindowOpen(true)
             
             setChatError(null)
 
@@ -266,6 +259,16 @@ export const ChatSocketProvider = ({ children }) => {
         })
 
     }
+
+    // Toggle para abrir/cerrar la ventana de chat (S3-FE-055)
+    const toggleChatWindow = useCallback(() => {
+        setIsChatWindowOpen(prev => !prev)
+    }, [])
+    
+    // Función para abrir la ventana directamente
+    const setChatWindowOpen = useCallback((isOpen) => {
+        setIsChatWindowOpen(isOpen)
+    }, [])
     
     // Función para el scroll
     const loadMoreMessages = async () => {
@@ -287,10 +290,13 @@ export const ChatSocketProvider = ({ children }) => {
         isLoadingHistory, 
         hasMoreHistory, 
         unreadConversations,
+        isChatWindowOpen,
         joinChatRoom,
         sendChatMessage,
         loadMoreMessages,
         markRoomAsRead,
+        toggleChatWindow,
+        setChatWindowOpen,
     }
 
     return (

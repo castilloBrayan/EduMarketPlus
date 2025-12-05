@@ -115,7 +115,6 @@ const ReviewForm = ({ cursoId, onReviewSubmitted }) => {
 
             {/* Área de Comentario */}
             <div className={styles.formGroup}>
-                <label htmlFor="comentario" className={styles.label}>Comparte tu opinión</label>
                 <textarea
                     id="comentario"
                     value={comentario}

@@ -103,16 +103,13 @@ const ReviewList = ({ cursoId, onReviewsLoaded, triggerRefresh }) => {
                     {reviews.map(review => (
                         <div key={review._id} className={styles.reviewCard}>
                             <div className={styles.reviewHeader}>
-                                {/* Uso de FaUserCircle si no hay foto_url */}
-                                {review.usuarioFotoUrl ? (
-                                    <img 
-                                        src={review.usuarioFotoUrl} 
-                                        alt={review.usuarioNombre} 
-                                        className={styles.userAvatar}
-                                    />
-                                ) : (
-                                    <FaUserCircle className={styles.userAvatarDefault} />
-                                )}
+                                
+                                <img 
+                                    src={review.usuarioFotoUrl || '/default-avatar.png'} 
+                                    alt={review.usuarioNombre} 
+                                    className={styles.userAvatar}
+                                />
+
                                 <div className={styles.userInfo}>
                                     <h4 className={styles.userName}>{review.usuarioNombre}</h4>
                                     <div className={styles.ratingStars}>
