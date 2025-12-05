@@ -1,0 +1,114 @@
+/* Estilos básicos para ChatWindow.jsx */
+.chat-window-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ajustar al contenedor padre */
+    max-height: 80vh; /* Ejemplo de altura máxima */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.chat-header {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-online {
+    color: green;
+    font-weight: bold;
+}
+
+.status-offline {
+    color: red;
+}
+
+.messages-area {
+    flex-grow: 1; /* Permite que el área de mensajes ocupe el espacio restante */
+    padding: 15px;
+    overflow-y: auto; /* Permite el scroll vertical */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-bubble {
+    display: flex;
+    align-items: flex-end;
+    max-width: 80%;
+    margin: 0;
+}
+
+.my-message {
+    align-self: flex-end;
+    flex-direction: row-reverse; /* Cambia el orden para el usuario actual */
+}
+
+.other-message {
+    align-self: flex-start;
+    flex-direction: row;
+}
+
+.message-content {
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 100%;
+    word-wrap: break-word; /* Para manejar textos largos */
+    position: relative;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.my-message .message-content {
+    background-color: #007bff; /* Azul para mis mensajes */
+    color: white;
+    margin-right: 10px;
+}
+
+.other-message .message-content {
+    background-color: #e4e6eb; /* Gris claro para otros */
+    color: #333;
+    margin-left: 10px;
+}
+
+.timestamp {
+    display: block;
+    font-size: 0.7em;
+    opacity: 0.6;
+    margin-top: 2px;
+    text-align: right;
+}
+
+.message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background-color: #fff;
+}
+
+.input-area input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.input-area button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
