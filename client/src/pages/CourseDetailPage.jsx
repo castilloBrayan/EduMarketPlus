@@ -166,8 +166,8 @@ const CourseDetailPage = () => {
         // Iniciar la conversación
         // joinChatRoom inicia la sala, y setChatWindowOpen abre el chatbox flotante (S3-FE-055)
         joinChatRoom(course.instructor_id)
-        
-        // setChatWindowOpen(true) 
+
+        setChatWindowOpen(true) 
     }
 
     if (loading) {
