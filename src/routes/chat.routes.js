@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { chatAccessMiddleware } from '../middlewares/chat.middleware.js'
-import { sendMessage, joinPrivateChat, getConversationsList } from '../controllers/chat.controller.js'
+import { joinPrivateChat, getConversationsList } from '../controllers/chat.controller.js'
 
 const router = Router()
 
