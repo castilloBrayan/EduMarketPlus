@@ -3,6 +3,8 @@ import { FaCommentDots, FaWindowClose, FaRegCommentDots } from 'react-icons/fa'
 import { useChatSocket } from '../context/chatSocket.hooks.js'
 import ChatWindow from '../components/ChatWindow.jsx' // El componente de la ventana principal
 
+import styles from './ChatBox.module.css'
+
 const ChatBox = () => {
     const { 
         isChatWindowOpen, 
@@ -24,11 +26,17 @@ const ChatBox = () => {
         toggleChatWindow()
     }
 
+    // Construir el className del botón flotante
+    const triggerClassNames = [
+        styles.chatTrigger,
+        totalUnreadCount > 0 ? styles.hasUnread : '', 
+    ].join(' ')
+
     return (
         <>
             {/* Botón Flotante */}
             <div 
-                className={`chat-trigger ${isChatWindowOpen ? 'open' : ''} ${totalUnreadCount > 0 ? 'has-unread' : ''}`}
+                className={triggerClassNames}
                 onClick={toggleChatWindow}
             >
                 {/* Ícono dinámico */}
@@ -36,14 +44,14 @@ const ChatBox = () => {
                 
                 {/* Notificaciones (S3-FE-052) */}
                 {totalUnreadCount > 0 && (
-                    <span className="unread-badge">{totalUnreadCount}</span>
+                    <span className={styles.unreadBadge}>{totalUnreadCount}</span>
                 )}
             </div>
 
             {/* Ventana del Chat (S3-FE-055) */}
             {isChatWindowOpen && (
-                <div className="chat-popup-window">
-                    <div className="chat-popup-header">
+                <div className={styles.chatPopupWindow}>
+                    <div className={styles.chatPopupHeader}>
                         <span>Chat en Vivo</span>
                         <button onClick={handleClose}>
                             <FaWindowClose />
